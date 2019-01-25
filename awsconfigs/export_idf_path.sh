@@ -1,0 +1,1 @@
+export IDF_PATH="C:/msys32/home/477grp6/esp/esp-idf"
