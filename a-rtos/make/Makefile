@@ -6,7 +6,7 @@
 PROJECT_NAME := aws_demos
 
 ifndef AMAZON_FREERTOS_PATH
-export AMAZON_FREERTOS_PATH := $(CURDIR)/../../../..
+export AMAZON_FREERTOS_PATH := $(CURDIR)/../../../../amazon-freertos
 endif
 
 ifndef IDF_PATH
