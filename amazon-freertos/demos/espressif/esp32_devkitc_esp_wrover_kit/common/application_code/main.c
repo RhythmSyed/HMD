@@ -159,10 +159,6 @@ int app_main( void )
 
         /* Run all demos. */
         DEMO_RUNNER_RunDemos();
-
-
-
-
     }
 
     /* Start the scheduler.  Initialization that requires the OS to be running,
