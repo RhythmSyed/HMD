@@ -77,6 +77,8 @@
 #include "aws_demo_config.h"
 #include "aws_hello_world.h"
 
+#include <math.h>
+
 /**
  * @brief MQTT client ID.
  *
@@ -419,6 +421,8 @@ static MQTTBool_t prvMQTTCallback( void * pvUserData,
              * a deadlock. */
             ( void ) xMessageBufferSend( xEchoMessageBuffer, cBuffer, ( size_t ) ulBytesToCopy + ( size_t ) 1, echoDONT_BLOCK );
         }
+        configPRINTF( ("[MSG]: \r\n") );
+        configPRINT_STRING(cBuffer);
     }
     else
     {
@@ -526,3 +530,26 @@ void vStartMQTTEchoDemo( void )
                           NULL );                              /* Not storing the task's handle. */
 }
 /*-----------------------------------------------------------*/
+
+
+
+/*------------------------ Below are functions added by HMD ------------------------*/
+
+void initializeAWS_hmd( void )
+{
+    BaseType_t xReturned = pdFAIL;
+    configPRINTF( ( "Creating HMD MQTT Task...\r\n" ) );
+    xEchoMessageBuffer = xMessageBufferCreate( ( size_t ) echoMAX_DATA_LENGTH + sizeof( size_t ) );
+    configASSERT( xEchoMessageBuffer );
+
+    while (xReturned != pdPASS) {
+        xReturned = prvCreateClientAndConnectToBroker();
+    }
+
+    configPRINTF( ( "MQTT HMD test echoing task created.\r\n" ) );
+    xReturned = prvSubscribe();
+}
+
+
+
+

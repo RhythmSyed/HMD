@@ -52,6 +52,15 @@
 #define mainLOGGING_TASK_STACK_SIZE         ( configMINIMAL_STACK_SIZE * 6 )
 #define mainDEVICE_NICK_NAME                "Espressif_Demo"
 
+// blink LED
+#include <stdio.h>
+#include "driver/gpio.h"
+#include "sdkconfig.h"
+
+#define BLINK_GPIO 5
+
+#include "hmdAWS_connectivity.h"
+
 /* Declare the firmware version structure for all to see. */
 const AppVersion32_t xAppFirmwareVersion = {
    .u.x.ucMajor = APP_VERSION_MAJOR,
@@ -132,6 +141,28 @@ static void prvMiscInitialization( void );
 /**
  * @brief Application runtime entry point.
  */
+ 
+void blink_task(void *pvParameter)
+{
+    /* Configure the IOMUX register for pad BLINK_GPIO (some pads are
+       muxed to GPIO on reset already, but some default to other
+       functions and need to be switched to GPIO. Consult the
+       Technical Reference for a list of pads and their default
+       functions.)
+    */
+    gpio_pad_select_gpio(BLINK_GPIO);
+    /* Set the GPIO as a push/pull output */
+    gpio_set_direction(BLINK_GPIO, GPIO_MODE_OUTPUT);
+    while(1) {
+        /* Blink off (output low) */
+        gpio_set_level(BLINK_GPIO, 0);
+        vTaskDelay(1000 / portTICK_PERIOD_MS);
+        /* Blink on (output high) */
+        gpio_set_level(BLINK_GPIO, 1);
+        vTaskDelay(1000 / portTICK_PERIOD_MS);
+    }
+}
+
 int app_main( void )
 {
     /* Perform any hardware initialization that does not require the RTOS to be
@@ -147,18 +178,21 @@ int app_main( void )
             ucDNSServerAddress,
             ucMACAddress );
 
+     gpio_pad_select_gpio(2);
+     gpio_set_direction(2, GPIO_MODE_INPUT);
+
     if( SYSTEM_Init() == pdPASS )
     {
-        /* Connect to the wifi before running the demos */
         prvWifiConnect();
 
-        /* A simple example to demonstrate key and certificate provisioning in
-        * microcontroller flash using PKCS#11 interface. This should be replaced
-        * by production ready key provisioning mechanism. */
-        vDevModeKeyProvisioning();
+        initializeAWS_hmd();
 
-        /* Run all demos. */
-        DEMO_RUNNER_RunDemos();
+        while (gpio_get_level(2) == 0) {
+        }
+
+        //prvPublishNextMessage(1);
+
+        
     }
 
     /* Start the scheduler.  Initialization that requires the OS to be running,
@@ -166,6 +200,8 @@ int app_main( void )
      * startup hook. */
     // Following is taken care by initialization code in ESP IDF
     // vTaskStartScheduler();
+	
+	//xTaskCreate(&blink_task, "blink_task", configMINIMAL_STACK_SIZE, NULL, 5, NULL);
 
     return 0;
 }

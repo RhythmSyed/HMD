@@ -23,11 +23,16 @@
  * http://www.FreeRTOS.org
  */
 
-#ifndef _AWS_HELLO_WORLD_H_
-#define _AWS_HELLO_WORLD_H_
+// #ifndef _AWS_HELLO_WORLD_H_
+// #define _AWS_HELLO_WORLD_H_
 
-#include "aws_demo.h"
+// #include "aws_demo.h"
 
-demoDECLARE_DEMO( vStartMQTTEchoDemo );
+// demoDECLARE_DEMO( vStartMQTTEchoDemo );
 
-#endif
+// #endif
+
+
+//Below edited by HMD
+
+extern void HMDTask( void );
