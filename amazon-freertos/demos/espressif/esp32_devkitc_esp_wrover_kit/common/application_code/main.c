@@ -192,18 +192,43 @@ int app_main( void )
 
         //while (gpio_get_level(2) == 0) {
         //}
+        bool down = false;
+        int down_count = 0;
+        bool up = false;
+        int up_count = 0;
         while (1){
         
             adc1_config_width(ADC_WIDTH_BIT_12);
             adc1_config_channel_atten(ADC1_CHANNEL_0,ADC_ATTEN_DB_11);
             int val = adc1_get_raw(ADC1_CHANNEL_0);
+            
             //configPRINTF( ( "\nADC Val: %d \r\n", val ) );
 
-            if( val >1900 && val < 3500){
-                configPRINTF( ( "ADC Val: %d \r\n", val ) );
+            if( val >1735 && val < 3500){
+                //configPRINTF( ( "ADC Val: %d \r\n", val ) );
 
             }
-            
+            if( val < 1753){
+                down = true;
+                down_count++;
+            }
+            if(down_count > 10 && val > 1812){
+                up = true;
+                up_count++;
+            }
+            if( up_count > 10 && val < 1812){
+                configPRINTF( ( "BEAT! ADC Val: %d \r\n", val ) );
+                down = false;
+                down_count = 0;
+                up_count = 0;
+                up = false;
+            }
+            //need to find vefuse for chip
+            //should hover around 1735
+            //if heart beat goes up .5V, then goes up 525 points
+
+            //wrist, low 1611, target thresh 1753
+            //high 1913, target thresh 1812
             
 
         }
