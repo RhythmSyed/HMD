@@ -57,6 +57,9 @@
 #include "driver/gpio.h"
 #include "sdkconfig.h"
 
+// Heart Rate sensor
+#include <driver/adc.h>
+
 #define BLINK_GPIO 5
 
 #include "hmdAWS_connectivity.h"
@@ -185,11 +188,25 @@ int app_main( void )
     {
         prvWifiConnect();
 
-        initializeAWS_hmd();
+        //initializeAWS_hmd();
 
-        while (gpio_get_level(2) == 0) {
+        //while (gpio_get_level(2) == 0) {
+        //}
+        while (1){
+        
+            adc1_config_width(ADC_WIDTH_BIT_12);
+            adc1_config_channel_atten(ADC1_CHANNEL_0,ADC_ATTEN_DB_11);
+            int val = adc1_get_raw(ADC1_CHANNEL_0);
+            //configPRINTF( ( "\nADC Val: %d \r\n", val ) );
+
+            if( val >1900 && val < 3500){
+                configPRINTF( ( "ADC Val: %d \r\n", val ) );
+
+            }
+            
+            
+
         }
-
         //prvPublishNextMessage(1);
 
         
