@@ -1,5 +1,5 @@
 /*
- * Amazon FreeRTOS V1.1.4
+ * Amazon FreeRTOS V1.1.2  
  * Copyright (C) 2018 Amazon.com, Inc. or its affiliates.  All Rights Reserved.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of
@@ -34,19 +34,19 @@
 /**
  * @brief The number of words allocated to the stack for the OTA agent.
  */
-#define otaconfigSTACK_SIZE                     630U
+#define otaconfigSTACK_SIZE                     630U    /* FIX ME. */
 
 /**
  * @brief Log base 2 of the size of the file data block message (excluding the header).
  *
  * 10 bits yields a data block size of 1KB.
  */
-#define otaconfigLOG2_FILE_BLOCK_SIZE           10UL
+#define otaconfigLOG2_FILE_BLOCK_SIZE           10UL    /* FIX ME. */
 
 /**
  * @brief Milliseconds to wait for the self test phase to succeed before we force reset.
  */
-#define otaconfigSELF_TEST_RESPONSE_WAIT_MS     16000U
+#define otaconfigSELF_TEST_RESPONSE_WAIT_MS     16000U  /* FIX ME. */
 
 /**
  * @brief Milliseconds to wait before requesting data blocks from the OTA service if nothing is happening.
@@ -54,12 +54,12 @@
  * The wait timer is reset whenever a data block is received from the OTA service so we will only send
  * the request message after being idle for this amount of time.
  */
-#define otaconfigFILE_REQUEST_WAIT_MS           2500U
+#define otaconfigFILE_REQUEST_WAIT_MS           2500U   /* FIX ME. */
 
 /**
  * @brief The OTA agent task priority. Normally it runs at a low priority.
  */
-#define otaconfigAGENT_PRIORITY                 tskIDLE_PRIORITY
+#define otaconfigAGENT_PRIORITY                 tskIDLE_PRIORITY /* FIX ME. */
 
 /**
  * @brief The maximum allowed length of the thing name used by the OTA agent.
@@ -69,6 +69,6 @@
  * initializing the OTA agent. The agent uses this size to allocate static storage for the
  * Thing name used in all OTA base topics. Namely $aws/things/<thingName>
  */
-#define otaconfigMAX_THINGNAME_LEN              64
+#define otaconfigMAX_THINGNAME_LEN              64  /* FIX ME. */
 
 #endif /* _AWS_OTA_AGENT_CONFIG_H_ */

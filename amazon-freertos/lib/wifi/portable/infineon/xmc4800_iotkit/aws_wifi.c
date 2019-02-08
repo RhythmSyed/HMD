@@ -1,5 +1,5 @@
 /*
- * Amazon FreeRTOS Wi-Fi for Infineon XMC4800 IoT Connectivity Kit V1.0.1
+ * Amazon FreeRTOS Wi-Fi for Infineon XMC4800 IoT Connectivity Kit V1.0.0
  * Copyright (C) 2018 Amazon.com, Inc. or its affiliates.  All Rights Reserved.
  *
  * Copyright (c) 2018, Infineon Technologies AG
@@ -529,18 +529,21 @@ WIFIReturnCode_t WIFI_GetHostIP( char * pcHost,
 
 WIFIReturnCode_t WIFI_StartAP( void )
 {
+    /* FIX ME. */
     return eWiFiNotSupported;
 }
 /*-----------------------------------------------------------*/
 
 WIFIReturnCode_t WIFI_StopAP( void )
 {
+    /* FIX ME. */
     return eWiFiNotSupported;
 }
 /*-----------------------------------------------------------*/
 
 WIFIReturnCode_t WIFI_ConfigureAP( const WIFINetworkParams_t * const pxNetworkParams )
 {
+    /* FIX ME. */
     return eWiFiNotSupported;
 }
 /*-----------------------------------------------------------*/
@@ -548,6 +551,7 @@ WIFIReturnCode_t WIFI_ConfigureAP( const WIFINetworkParams_t * const pxNetworkPa
 WIFIReturnCode_t WIFI_SetPMMode( WIFIPMMode_t xPMModeType,
                                  const void * pvOptionValue )
 {
+    /* FIX ME. */
     return eWiFiNotSupported;
 }
 /*-----------------------------------------------------------*/
@@ -555,6 +559,7 @@ WIFIReturnCode_t WIFI_SetPMMode( WIFIPMMode_t xPMModeType,
 WIFIReturnCode_t WIFI_GetPMMode( WIFIPMMode_t * pxPMModeType,
                                  void * pvOptionValue )
 {
+    /* FIX ME. */
     return eWiFiNotSupported;
 }
 /*-----------------------------------------------------------*/

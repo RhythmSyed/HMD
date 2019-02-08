@@ -1,5 +1,5 @@
 /*
- * Amazon FreeRTOS POSIX Test V1.1.4
+ * Amazon FreeRTOS POSIX Test V1.1.2  
  * Copyright (C) 2018 Amazon.com, Inc. or its affiliates.  All Rights Reserved.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of
@@ -74,7 +74,7 @@ static void prvClockSleep( const struct timespec * const pxSleepTime,
     TEST_ASSERT_EQUAL_INT( true, UTILS_ValidateTimespec( &xEndTime ) );
 
     /* Verify that xEndTime > xStartTime. Also calculates elapsed time. */
-    TEST_ASSERT_EQUAL_INT( 0, UTILS_TimespecSubtract( &xEndTime, &xStartTime, pxElapsedTime ) );
+    TEST_ASSERT_EQUAL_INT( 0, UTILS_TimespecSubtract( pxElapsedTime, &xEndTime, &xStartTime ) );
 }
 
 /*-----------------------------------------------------------*/
@@ -97,7 +97,9 @@ TEST_TEAR_DOWN( Full_POSIX_CLOCK )
 
 TEST_GROUP_RUNNER( Full_POSIX_CLOCK )
 {
+    RUN_TEST_CASE( Full_POSIX_CLOCK, clock );
     RUN_TEST_CASE( Full_POSIX_CLOCK, clock_gettime_nanosleep );
+    RUN_TEST_CASE( Full_POSIX_CLOCK, clock_getcpuclockid );
     RUN_TEST_CASE( Full_POSIX_CLOCK, clock_getres );
     RUN_TEST_CASE( Full_POSIX_CLOCK, clock_nanosleep_absolute );
     RUN_TEST_CASE( Full_POSIX_CLOCK, clock_nanosleep_min_resolution );
@@ -105,9 +107,20 @@ TEST_GROUP_RUNNER( Full_POSIX_CLOCK )
     RUN_TEST_CASE( Full_POSIX_CLOCK, clock_nanosleep_absolute_in_past );
     RUN_TEST_CASE( Full_POSIX_CLOCK, nanosleep );
     RUN_TEST_CASE( Full_POSIX_CLOCK, nanosleep_invalid_params );
+    RUN_TEST_CASE( Full_POSIX_CLOCK, clock_settime );
     RUN_TEST_CASE( Full_POSIX_CLOCK, localtime_r );
     RUN_TEST_CASE( Full_POSIX_CLOCK, strftime );
     RUN_TEST_CASE( Full_POSIX_CLOCK, time );
+}
+
+/*-----------------------------------------------------------*/
+
+TEST( Full_POSIX_CLOCK, clock )
+{
+    clock_t xCpuTime = clock();
+
+    /* Verify that at least large than 0. */
+    TEST_ASSERT_TRUE( 0 < xCpuTime );
 }
 
 /*-----------------------------------------------------------*/
@@ -124,6 +137,20 @@ TEST( Full_POSIX_CLOCK, clock_gettime_nanosleep )
     TEST_ASSERT_TRUE( 0 <= xElapsedTime.tv_sec );
     TEST_ASSERT_TRUE( 1 > xElapsedTime.tv_sec );
     TEST_ASSERT_TRUE( 1000000 <= xElapsedTime.tv_nsec );
+}
+
+/*-----------------------------------------------------------*/
+
+TEST( Full_POSIX_CLOCK, clock_getcpuclockid )
+{
+    clockid_t xClockId = 0;
+
+    /* Per Open group, if pid is zero, this function shall return the clock ID
+     * of the CPU-time clock of the process making the call, in clock_id. */
+    pid_t xPid = 0;
+
+    /* clock_getcpuclockid is unsupported and shall always return EPERM. */
+    TEST_ASSERT_EQUAL_INT( EPERM, clock_getcpuclockid( xPid, &xClockId ) );
 }
 
 /*-----------------------------------------------------------*/
@@ -153,7 +180,7 @@ TEST( Full_POSIX_CLOCK, clock_nanosleep_absolute )
     TEST_ASSERT_EQUAL_INT( 0, iStatus );
 
     /* Wake up 5 ms from now. */
-    iStatus = UTILS_TimespecAddNanoseconds( &xWakeTime, 5000000, &xWakeTime );
+    iStatus = UTILS_TimespecAddNanoseconds( &xWakeTime, &xWakeTime, 5000000 );
     TEST_ASSERT_EQUAL_INT( 0, iStatus );
 
     prvClockSleep( &xWakeTime, &xElapsedTime, TIMER_ABSTIME );
@@ -185,8 +212,8 @@ TEST( Full_POSIX_CLOCK, clock_nanosleep_min_resolution )
      * sleep for smaller than the minimum resolution slept for the minimum
      * resolution. */
     TEST_ASSERT_EQUAL_INT( 0, UTILS_TimespecSubtract( &xElapsedTime,
-                                                      &xResolution,
-                                                      &xElapsedTime ) );
+                                                      &xElapsedTime,
+                                                      &xResolution ) );
 }
 
 /*-----------------------------------------------------------*/
@@ -223,7 +250,7 @@ TEST( Full_POSIX_CLOCK, clock_nanosleep_absolute_in_past )
     TEST_ASSERT_EQUAL_INT( 0, iStatus );
 
     /* Set a timeout 5 ms in the past. */
-    iStatus = UTILS_TimespecAddNanoseconds( &xWakeTime, -5000000, &xWakeTime );
+    iStatus = UTILS_TimespecAddNanoseconds( &xWakeTime, &xWakeTime, -5000000 );
     TEST_ASSERT_EQUAL_INT( 0, iStatus );
 
     prvClockSleep( &xWakeTime, &xElapsedTime, TIMER_ABSTIME );
@@ -254,7 +281,7 @@ TEST( Full_POSIX_CLOCK, nanosleep )
     TEST_ASSERT_EQUAL_INT( 0, iStatus );
 
     /* Verify that xEndTime > xStartTime. Also calculates elapsed time. */
-    TEST_ASSERT_EQUAL_INT( 0, UTILS_TimespecSubtract( &xEndTime, &xStartTime, &xElapsedTime ) );
+    TEST_ASSERT_EQUAL_INT( 0, UTILS_TimespecSubtract( &xElapsedTime, &xEndTime, &xStartTime ) );
 
     /* Verify that at least 1 ms elapsed. */
     TEST_ASSERT_TRUE( 0 <= xElapsedTime.tv_sec );
@@ -277,6 +304,18 @@ TEST( Full_POSIX_CLOCK, nanosleep_invalid_params )
     TEST_ASSERT_EQUAL_INT( -1, nanosleep( &xSleepTime, NULL ) );
     TEST_ASSERT_EQUAL_INT( EINVAL, errno );
 }
+
+/*-----------------------------------------------------------*/
+
+TEST( Full_POSIX_CLOCK, clock_settime )
+{
+    struct timespec xTime = { .tv_sec = 0, .tv_nsec = 0 };
+
+    /* clock_settime is unsupported and shall always return -q with errno set to EPERM. */
+    TEST_ASSERT_EQUAL_INT( -1, clock_settime( CLOCK_REALTIME, &xTime ) );
+    TEST_ASSERT_EQUAL_INT( EPERM, errno );
+}
+
 
 /*-----------------------------------------------------------*/
 

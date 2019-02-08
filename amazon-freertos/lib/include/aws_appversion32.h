@@ -29,6 +29,7 @@
 #include <stdint.h>
 
 /* Application version structure. */
+#pragma pack(push,1)
 typedef struct {
 	union {
 #if (defined(__BYTE_ORDER__) && defined(__ORDER_LITTLE_ENDIAN__) && __BYTE_ORDER__ == __ORDER_LITTLE_ENDIAN__) || (__little_endian__ == 1) || WIN32 || (__BYTE_ORDER == __LITTLE_ENDIAN)
@@ -50,5 +51,6 @@ typedef struct {
 		int32_t  lVersion32;
 	} u;
 } AppVersion32_t;
+#pragma pack(pop)
 
 #endif

@@ -1,5 +1,5 @@
 /*
- * Amazon FreeRTOS WIFI AFQP V1.1.4
+ * Amazon FreeRTOS WIFI AFQP V1.1.2  
  * Copyright (C) 2017 Amazon.com, Inc. or its affiliates.  All Rights Reserved.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of
@@ -50,7 +50,7 @@
 /* Testing configurations defintions. */
 
 /* The number of times to loop in the WiFiConnectionLoop test. */
-#define testwifiCONNECTION_LOOP_TIMES    3
+#define testwifiCONNECTION_LOOP_TIMES    5
 
 /* The delay in ms between connection and disconnection. This can be configured
  * in aws_test_wifi_config.h for your specific platform. */
@@ -1845,7 +1845,7 @@ TEST( Full_WiFi, AFQP_WIFI_ConnectAP_NullParameters )
 TEST( Full_WiFi, AFQP_WIFI_ConnectAP_InvalidPassword )
 {
     WIFINetworkParams_t xNetworkParams = { 0 };
-    WIFIReturnCode_t xWiFiStatus = eWiFiFailure;
+    WIFIReturnCode_t xWiFiStatus;
     BaseType_t xIsConnected;
 
     /* Set the valid client parameters. */
@@ -1878,7 +1878,7 @@ TEST( Full_WiFi, AFQP_WIFI_ConnectAP_InvalidPassword )
 TEST( Full_WiFi, AFQP_WIFI_ConnectAP_InvalidSSID )
 {
     WIFINetworkParams_t xNetworkParams = { 0 };
-    WIFIReturnCode_t xWiFiStatus = eWiFiFailure;
+    WIFIReturnCode_t xWiFiStatus;
     BaseType_t xIsConnected;
 
     /* Set the valid client parameters. */
@@ -1966,7 +1966,7 @@ TEST( Full_WiFi, AFQP_WIFI_ConnectAP_ConnectAllChannels )
 TEST( Full_WiFi, AFQP_WIFI_ConnectAP_MaxSSIDLengthExceeded )
 {
     WIFINetworkParams_t xNetworkParams = { 0 };
-    WIFIReturnCode_t xWiFiStatus = eWiFiFailure;
+    WIFIReturnCode_t xWiFiStatus;
     BaseType_t xIsConnected;
     char cLengthExceedingSSID[ wificonfigMAX_SSID_LEN + 2 ];
 
@@ -2004,7 +2004,7 @@ TEST( Full_WiFi, AFQP_WIFI_ConnectAP_MaxSSIDLengthExceeded )
 TEST( Full_WiFi, AFQP_WIFI_ConnectAP_MaxPasswordLengthExceeded )
 {
     WIFINetworkParams_t xNetworkParams = { 0 };
-    WIFIReturnCode_t xWiFiStatus = eWiFiFailure;
+    WIFIReturnCode_t xWiFiStatus;
     BaseType_t xIsConnected;
     char cLengthExceedingPassword[ wificonfigMAX_PASSPHRASE_LEN + 2 ];
 
@@ -2260,8 +2260,7 @@ static void prvConnectionTask( void * pvParameters )
         vTaskDelay( testwifiCONNECTION_DELAY );
 
         /* Wait for the other tasks to finish connecting. */
-        if( ( xTaskConnectDisconnectSyncEventGroupHandle != NULL ) &&
-            xEventGroupSync(
+        if( xEventGroupSync(
                 xTaskConnectDisconnectSyncEventGroupHandle,
                 ( 0x1
                     << pxTaskParams->usTaskId ), /* Set our task ID when we are done. */
@@ -2299,8 +2298,7 @@ static void prvConnectionTask( void * pvParameters )
         }
 
         /* Wait for the other tasks before moving on to disconnecting. */
-        if( ( xTaskConnectDisconnectSyncEventGroupHandle != NULL ) &&
-            xEventGroupSync(
+        if( xEventGroupSync(
                 xTaskConnectDisconnectSyncEventGroupHandle, /* The event group used
                                                              * for the rendezvous.
                                                              */
@@ -2334,8 +2332,7 @@ static void prvConnectionTask( void * pvParameters )
         vTaskDelay( testwifiCONNECTION_DELAY );
 
         /* Wait for the other tasks. */
-        if( ( xTaskConnectDisconnectSyncEventGroupHandle != NULL ) &&
-            xEventGroupSync(
+        if( xEventGroupSync(
                 xTaskConnectDisconnectSyncEventGroupHandle,
                 ( 0x1
                     << pxTaskParams->usTaskId ), /* Set our task ID when we are done. */
@@ -2375,8 +2372,7 @@ static void prvConnectionTask( void * pvParameters )
         }
 
         /* Wait for the other tasks. */
-        if( ( xTaskConnectDisconnectSyncEventGroupHandle != NULL ) &&
-            xEventGroupSync(
+        if( xEventGroupSync(
                 xTaskConnectDisconnectSyncEventGroupHandle,
                 ( 0x1
                     << pxTaskParams->usTaskId ), /* Set our task ID when we are done. */
@@ -2399,11 +2395,8 @@ static void prvConnectionTask( void * pvParameters )
     }
 
     /* Flag that the task is done. */
-    if( xTaskFinishEventGroupHandle != NULL )
-    {
-        xEventGroupSetBits( xTaskFinishEventGroupHandle,
+    xEventGroupSetBits( xTaskFinishEventGroupHandle,
                         ( 1 << pxTaskParams->usTaskId ) );
-    }
 
     vTaskDelete( NULL ); /* Delete this task. */
 }
@@ -2480,13 +2473,11 @@ TEST( Full_WiFi, AFQP_WiFiSeperateTasksConnectingAndDisconnectingAtOnce )
     if( xTaskFinishEventGroupHandle != NULL )
     {
         vEventGroupDelete( xTaskFinishEventGroupHandle );
-        xTaskFinishEventGroupHandle = NULL;
     }
 
     /* Clean up the connection and disconnection sync event groups. */
     if( xTaskConnectDisconnectSyncEventGroupHandle != NULL )
     {
         vEventGroupDelete( xTaskConnectDisconnectSyncEventGroupHandle );
-        xTaskConnectDisconnectSyncEventGroupHandle = NULL;
     }
 }

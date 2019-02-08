@@ -1,5 +1,5 @@
 /*
- * Amazon FreeRTOS V1.4.6
+ * Amazon FreeRTOS V1.4.4
  * Copyright (C) 2017 Amazon.com, Inc. or its affiliates.  All Rights Reserved.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of
@@ -23,16 +23,11 @@
  * http://www.FreeRTOS.org
  */
 
-// #ifndef _AWS_HELLO_WORLD_H_
-// #define _AWS_HELLO_WORLD_H_
+#ifndef _AWS_HELLO_WORLD_H_
+#define _AWS_HELLO_WORLD_H_
 
-// #include "aws_demo.h"
+#include "aws_demo.h"
 
-// demoDECLARE_DEMO( vStartMQTTEchoDemo );
+demoDECLARE_DEMO( vStartMQTTEchoDemo );
 
-// #endif
-
-
-//Below edited by HMD
-
-extern void HMDTask( void );
+#endif

@@ -1,5 +1,5 @@
 /*
- * Amazon FreeRTOS+POSIX V1.0.2
+ * Amazon FreeRTOS+POSIX V1.0.1
  * Copyright (C) 2018 Amazon.com, Inc. or its affiliates.  All Rights Reserved.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of
@@ -42,13 +42,9 @@
 /* FreeRTOS timer include. */
 #include "timers.h"
 
-/**
- * @defgroup Timespec zero check macros.
- */
-/**@{ */
+/* Timespec zero check macros. */
 #define TIMESPEC_IS_ZERO( xTimespec )        ( xTimespec.tv_sec == 0 && xTimespec.tv_nsec == 0 ) /**< Check for 0. */
 #define TIMESPEC_IS_NOT_ZERO( xTimespec )    ( !( TIMESPEC_IS_ZERO( xTimespec ) ) )              /**< Check for not 0. */
-/**@} */
 
 /**
  * @brief Internal timer structure.
@@ -66,6 +62,7 @@ void prvTimerCallback( TimerHandle_t xTimerHandle )
 {
     timer_internal_t * pxTimer = ( timer_internal_t * ) pvTimerGetTimerID( xTimerHandle );
     pthread_t xTimerNotificationThread;
+    pthread_attr_t xThreadAttributes;
 
     /* The value of the timer ID, set in timer_create, should not be NULL. */
     configASSERT( pxTimer != NULL );
@@ -84,11 +81,23 @@ void prvTimerCallback( TimerHandle_t xTimerHandle )
     /* Create the timer notification thread if requested. */
     if( pxTimer->xTimerEvent.sigev_notify == SIGEV_THREAD )
     {
-        /* if the user has provided thread attributes, create a thread
-         * with the provided attributes. Otherwise dispatch callback directly */
+        /* By default, create a detached thread. But if the user has provided
+         * thread attributes, use the provided attributes. */
         if( pxTimer->xTimerEvent.sigev_notify_attributes == NULL )
         {
-            ( *pxTimer->xTimerEvent.sigev_notify_function )( pxTimer->xTimerEvent.sigev_value );
+            if( pthread_attr_init( &xThreadAttributes ) == 0 )
+            {
+                if( pthread_attr_setdetachstate( &xThreadAttributes,
+                                                 PTHREAD_CREATE_DETACHED ) == 0 )
+                {
+                    ( void ) pthread_create( &xTimerNotificationThread,
+                                             &xThreadAttributes,
+                                             ( void * ( * )( void * ) )pxTimer->xTimerEvent.sigev_notify_function,
+                                             pxTimer->xTimerEvent.sigev_value.sival_ptr );
+                }
+
+                ( void ) pthread_attr_destroy( &xThreadAttributes );
+            }
         }
         else
         {
@@ -162,15 +171,19 @@ int timer_delete( timer_t timerid )
     /* The value of the timer ID, set in timer_create, should not be NULL. */
     configASSERT( pxTimer != NULL );
 
-    /* Stop the FreeRTOS timer. Because the timer is statically allocated, no call
-     * to xTimerDelete is necessary. The timer is stopped so that it's not referenced
-     * anywhere. xTimerStop will not fail when it has unlimited block time. */
-    ( void ) xTimerStop( xTimerHandle, portMAX_DELAY );
-
-    /* Wait until the timer stop command is processed. */
-    while( xTimerIsTimerActive( xTimerHandle ) == pdTRUE )
+    if( xTimerIsTimerActive( xTimerHandle ) == pdTRUE )
     {
-        vTaskDelay( 1 );
+        /* Stop the FreeRTOS timer. Because the timer is statically allocated, no call
+         * to xTimerDelete is necessary. The timer is stopped so that it's not referenced
+         * anywhere. xTimerStop will not fail when it has unlimited block time. */
+        ( void ) xTimerStop( xTimerHandle, portMAX_DELAY );
+
+
+        /* Wait until the timer stop command is processed. */
+        while( xTimerIsTimerActive( xTimerHandle ) == pdTRUE )
+        {
+            vTaskDelay( 100 );
+        }
     }
 
     /* Free the memory in use by the timer. */
@@ -245,29 +258,7 @@ int timer_settime( timer_t timerid,
             /* Absolute timeout. */
             if( ( flags & TIMER_ABSTIME ) == TIMER_ABSTIME )
             {
-                struct timespec xCurrentTime = { 0 };
-
-                /* Get current time */
-                if( clock_gettime( CLOCK_REALTIME, &xCurrentTime ) != 0 )
-                {
-                    iStatus = EINVAL;
-                }
-                else
-                {
-                    iStatus = UTILS_AbsoluteTimespecToDeltaTicks( &value->it_value, &xCurrentTime, &xNextTimerExpiration );
-                }
-
-                /* Make sure xNextTimerExpiration is zero in case we got negative time difference */
-                if( iStatus != 0 )
-                {
-                    xNextTimerExpiration = 0;
-
-                    if ( iStatus == ETIMEDOUT )
-                    {
-                        /* Set Status to 0 as absolute time is past is treated as expiry but not an error */
-                        iStatus = 0;
-                    }
-                }
+                ( void ) UTILS_AbsoluteTimespecToTicks( &value->it_value, &xNextTimerExpiration );
             }
             /* Relative timeout. */
             else

@@ -30,7 +30,6 @@
 /* FreeRTOS includes. */
 #include "FreeRTOS.h"
 #include "task.h"
-#include "aws_logging_task.h"
 
 /* Test framework include */
 #include "aws_test_framework.h"

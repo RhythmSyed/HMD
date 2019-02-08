@@ -1,5 +1,5 @@
 /*
- * Amazon FreeRTOS+POSIX V1.0.2
+ * Amazon FreeRTOS+POSIX V1.0.1
  * Copyright (C) 2018 Amazon.com, Inc. or its affiliates.  All Rights Reserved.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of
@@ -30,12 +30,20 @@
 
 /* C standard library includes. */
 #include <stddef.h>
-#include <limits.h>
 
 /* FreeRTOS+POSIX includes. */
 #include "FreeRTOS_POSIX.h"
 #include "FreeRTOS_POSIX/errno.h"
 #include "FreeRTOS_POSIX/utils.h"
+
+/* Define the conversion constants if they are undefined. Conversion constants
+ * may be undefined if the FreeRTOS+POSIX time header isn't used. */
+#ifndef NANOSECONDS_PER_SECOND
+    #define NANOSECONDS_PER_SECOND     ( 1000000000LL )                                /**< Nanoseconds per second. */
+#endif
+#ifndef NANOSECONDS_PER_TICK
+    #define NANOSECONDS_PER_TICK       ( NANOSECONDS_PER_SECOND / configTICK_RATE_HZ ) /**< Nanoseconds per FreeRTOS tick. */
+#endif
 
 /*-----------------------------------------------------------*/
 
@@ -59,32 +67,34 @@ size_t UTILS_strnlen( const char * const pcString,
 
 /*-----------------------------------------------------------*/
 
-int UTILS_AbsoluteTimespecToDeltaTicks( const struct timespec * const pxAbsoluteTime,
-                                   const struct timespec * const pxCurrentTime,
+int UTILS_AbsoluteTimespecToTicks( const struct timespec * const pxAbsoluteTime,
                                    TickType_t * const pxResult )
 {
     int iStatus = 0;
-    struct timespec xDifference = { 0 };
+    struct timespec xCurrentTime = { 0 }, xDifference = { 0 };
 
     /* Check parameters. */
-    if( ( pxAbsoluteTime == NULL ) || ( pxCurrentTime == NULL ) || ( pxResult == NULL ) )
+    if( ( pxAbsoluteTime == NULL ) || ( pxResult == NULL ) )
     {
         iStatus = EINVAL;
     }
 
-    /* Calculate the difference between the current time and absolute time. */
+    /* Get the current time. */
     if( iStatus == 0 )
     {
-        iStatus = UTILS_TimespecSubtract( pxAbsoluteTime, pxCurrentTime, &xDifference );
-        if( iStatus == 1 )
+        if( clock_gettime( CLOCK_REALTIME, &xCurrentTime ) != 0 )
+        {
+            iStatus = errno;
+        }
+    }
+
+    /* Calculate the difference between the current time and pxAbsoluteTime. */
+    if( iStatus == 0 )
+    {
+        if( UTILS_TimespecSubtract( &xDifference, pxAbsoluteTime, &xCurrentTime ) != 0 )
         {
             /* pxAbsoluteTime was in the past. */
             iStatus = ETIMEDOUT;
-        }
-        else if( iStatus == -1 )
-        {
-            /* error */
-            iStatus = EINVAL;
         }
     }
 
@@ -103,7 +113,7 @@ int UTILS_TimespecToTicks( const struct timespec * const pxTimespec,
                            TickType_t * const pxResult )
 {
     int iStatus = 0;
-    int64_t llTotalTicks = 0;
+    uint64_t ullTotalTicks = 0;
     long lNanoseconds = 0;
 
     /* Check parameters. */
@@ -111,7 +121,7 @@ int UTILS_TimespecToTicks( const struct timespec * const pxTimespec,
     {
         iStatus = EINVAL;
     }
-    else if( ( iStatus == 0 ) && ( UTILS_ValidateTimespec( pxTimespec ) == false ) )
+    else if( ( pxTimespec != NULL ) && ( UTILS_ValidateTimespec( pxTimespec ) == false ) )
     {
         iStatus = EINVAL;
     }
@@ -119,7 +129,7 @@ int UTILS_TimespecToTicks( const struct timespec * const pxTimespec,
     if( iStatus == 0 )
     {
         /* Convert timespec.tv_sec to ticks. */
-        llTotalTicks = ( int64_t ) configTICK_RATE_HZ * ( pxTimespec->tv_sec );
+        ullTotalTicks = ( uint64_t ) configTICK_RATE_HZ * ( uint64_t ) ( pxTimespec->tv_sec );
 
         /* Convert timespec.tv_nsec to ticks. This value does not have to be checked
          * for overflow because a valid timespec has 0 <= tv_nsec < 1000000000 and
@@ -128,29 +138,10 @@ int UTILS_TimespecToTicks( const struct timespec * const pxTimespec,
                        ( long ) ( pxTimespec->tv_nsec % ( long ) NANOSECONDS_PER_TICK != 0 ); /* Add 1 to round up if needed. */
 
         /* Add the nanoseconds to the total ticks. */
-        llTotalTicks += ( int64_t ) lNanoseconds;
-
-        /* Check for overflow */
-        if( llTotalTicks < 0 )
-        {
-            iStatus = EINVAL;
-        }
-        else
-        {
-            /* check if TickType_t is 32 bit or 64 bit */
-            uint32_t ulTickTypeSize = sizeof( TickType_t );
-            /* check for downcast overflow */
-            if ( ulTickTypeSize == sizeof( uint32_t ) )
-            {
-                if ( llTotalTicks > UINT_MAX )
-                {
-                    iStatus = EINVAL;
-                }
-            }
-        }
+        ullTotalTicks += ( uint64_t ) lNanoseconds;
 
         /* Write result. */
-        *pxResult = ( TickType_t ) llTotalTicks;
+        *pxResult = ( TickType_t ) ullTotalTicks;
     }
 
     return iStatus;
@@ -180,189 +171,71 @@ void UTILS_NanosecondsToTimespec( int64_t llSource,
 
 /*-----------------------------------------------------------*/
 
-int UTILS_TimespecAdd( const struct timespec * const x,
-                       const struct timespec * const y,
-                       struct timespec * const pxResult )
+int UTILS_TimespecAdd( struct timespec * const pxResult,
+                       const struct timespec * const x,
+                       const struct timespec * const y )
 {
-    int64_t llPartialSec = 0;
-    int iStatus = 0;
+    int64_t llResult64 = 0;
 
     /* Check parameters. */
     if( ( pxResult == NULL ) || ( x == NULL ) || ( y == NULL ) )
     {
-        iStatus = -1;
+        return -1;
     }
 
-    if( iStatus == 0 )
-    {
-        /* Perform addition. */
-        pxResult->tv_nsec = x->tv_nsec + y->tv_nsec;
+    /* Perform addition. */
+    llResult64 = ( ( ( int64_t ) ( x->tv_sec ) * NANOSECONDS_PER_SECOND ) + ( int64_t ) ( x->tv_nsec ) )
+                 + ( ( ( int64_t ) ( y->tv_sec ) * NANOSECONDS_PER_SECOND ) + ( int64_t ) ( y->tv_nsec ) );
 
-        /* check for overflow in case nsec value was invalid */
-        if( pxResult->tv_nsec < 0 )
-        {
-            iStatus = 1;
-        }
-        else
-        {
-            llPartialSec = ( pxResult->tv_nsec ) / NANOSECONDS_PER_SECOND;
-            pxResult->tv_nsec = ( pxResult->tv_nsec ) % NANOSECONDS_PER_SECOND;
-            pxResult->tv_sec = x->tv_sec + y->tv_sec + llPartialSec;
+    /* Convert result to timespec. */
+    UTILS_NanosecondsToTimespec( llResult64, pxResult );
 
-            /* check for overflow */
-            if(  pxResult->tv_sec < 0 )
-            {
-                iStatus = 1;
-            }
-        }
-    }
-
-    return iStatus;
+    return ( int ) ( llResult64 < 0LL );
 }
 
 /*-----------------------------------------------------------*/
 
-int UTILS_TimespecAddNanoseconds( const struct timespec * const x,
-                                  int64_t llNanoseconds,
-                                  struct timespec * const pxResult )
+int UTILS_TimespecAddNanoseconds( struct timespec * const pxResult,
+                                  const struct timespec * const x,
+                                  int64_t llNanoseconds )
 {
-    int64_t llTotalNSec = 0;
-    int iStatus = 0;
+    struct timespec y = { .tv_sec = ( time_t ) 0, .tv_nsec = 0L };
 
     /* Check parameters. */
     if( ( pxResult == NULL ) || ( x == NULL ) )
     {
-        iStatus =  -1;
+        return -1;
     }
 
-    if( iStatus == 0 )
-    {
-        /* add nano seconds */
-        llTotalNSec = x->tv_nsec + llNanoseconds;
+    /* Convert llNanoseconds to a timespec. */
+    UTILS_NanosecondsToTimespec( llNanoseconds, &y );
 
-        /* check for nano seconds overflow */
-        if ( llTotalNSec < 0 )
-        {
-            iStatus = 1;
-        }
-        else
-        {
-
-            pxResult->tv_nsec =  llTotalNSec % NANOSECONDS_PER_SECOND;
-            pxResult->tv_sec =  x->tv_sec + ( llTotalNSec / NANOSECONDS_PER_SECOND );
-
-            /* check for seconds overflow */
-            if(  pxResult->tv_sec < 0 )
-            {
-                iStatus = 1;
-            }
-        }
-    }
-
-    return iStatus;
+    /* Perform addition. */
+    return UTILS_TimespecAdd( pxResult, x, &y );
 }
 
 /*-----------------------------------------------------------*/
 
-int UTILS_TimespecSubtract( const struct timespec * const x,
-                            const struct timespec * const y,
-                            struct timespec * const pxResult )
+int UTILS_TimespecSubtract( struct timespec * const pxResult,
+                            const struct timespec * const x,
+                            const struct timespec * const y )
 {
-
-    int iCompareResult = 0;
-    int iStatus = 0;
+    int64_t llResult64 = 0;
 
     /* Check parameters. */
     if( ( pxResult == NULL ) || ( x == NULL ) || ( y == NULL ) )
     {
-        iStatus = -1;
+        return -1;
     }
 
-    if( iStatus == 0 )
-    {
-        iCompareResult = UTILS_TimespecCompare( x, y );
+    /* Perform addition. */
+    llResult64 = ( ( ( int64_t ) ( x->tv_sec ) * NANOSECONDS_PER_SECOND ) + ( int64_t ) ( x->tv_nsec ) )
+                 - ( ( ( int64_t ) ( y->tv_sec ) * NANOSECONDS_PER_SECOND ) + ( int64_t ) ( y->tv_nsec ) );
 
-        /* if x < y then result would be negative, return 1 */
-        if( iCompareResult == -1 )
-        {
-            iStatus = 1;
-        }
-        else if( iCompareResult == 0 )
-        {
-            /* if times are the same return zero */
-            pxResult->tv_sec = 0;
-            pxResult->tv_nsec = 0;
-        }
-        else
-        {
-            /* If x > y Perform subtraction. */
-            pxResult->tv_sec = x->tv_sec - y->tv_sec;
-            pxResult->tv_nsec = x->tv_nsec - y->tv_nsec;
+    /* Convert result to timespec. */
+    UTILS_NanosecondsToTimespec( llResult64, pxResult );
 
-            /* check if nano seconds value needs to borrow */
-            if( pxResult->tv_nsec < 0 )
-            {
-                /* Based on comparison, tv_sec > 0 */
-                pxResult->tv_sec--;
-                pxResult->tv_nsec += (long) NANOSECONDS_PER_SECOND;
-            }
-
-            /* if nano second is negative after borrow, it is an overflow error */
-            if( pxResult->tv_nsec < 0 )
-            {
-                iStatus = -1;
-            }
-        }
-    }
-
-    return iStatus;
-}
-
-/*-----------------------------------------------------------*/
-
-int UTILS_TimespecCompare( const struct timespec * const x,
-                               const struct timespec * const y)
-{
-    int iStatus = 0;
-    /* Check parameters */
-    if( ( x == NULL ) && ( y == NULL ) )
-    {
-        iStatus = 0;
-    }
-    else if( y == NULL )
-    {
-        iStatus = 1;
-    }
-    else if( x == NULL )
-    {
-        iStatus = -1;
-    }
-    else if( x->tv_sec > y->tv_sec )
-    {
-        iStatus = 1;
-    }
-    else if( x->tv_sec < y->tv_sec )
-    {
-        iStatus = -1;
-    }
-    else
-    {
-        /* seconds are equal compare nano seconds */
-        if( x->tv_nsec > y->tv_nsec )
-        {
-            iStatus = 1;
-        }
-        else if(x->tv_nsec < y->tv_nsec)
-        {
-            iStatus = -1;
-        }
-        else
-        {
-            iStatus = 0;
-        }
-    }
-
-    return iStatus;
+    return ( int ) ( llResult64 < 0LL );
 }
 
 /*-----------------------------------------------------------*/

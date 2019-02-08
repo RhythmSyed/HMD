@@ -1,5 +1,5 @@
 /*
- * Amazon FreeRTOS Secure Sockets for FreeRTOS+TCP V1.1.5
+ * Amazon FreeRTOS Secure Socket for FreeRTOS+TCP V1.1.4
  * Copyright (C) 2018 Amazon.com, Inc. or its affiliates.  All Rights Reserved.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of
@@ -23,6 +23,10 @@
  * http://www.FreeRTOS.org
  */
 
+/* Define _SECURE_SOCKETS_WRAPPER_NOT_REDEFINE to prevent secure sockets functions
+ * from redefining in aws_secure_sockets_wrapper_metrics.h */
+#define _SECURE_SOCKETS_WRAPPER_NOT_REDEFINE
+
 /* FreeRTOS includes. */
 #include "FreeRTOS.h"
 #include "FreeRTOSIPConfig.h"
@@ -34,6 +38,8 @@
 #include "task.h"
 #include "aws_pkcs11.h"
 #include "aws_crypto.h"
+
+#undef _SECURE_SOCKETS_WRAPPER_NOT_REDEFINE
 
 /* Internal context structure. */
 typedef struct SSOCKETContext

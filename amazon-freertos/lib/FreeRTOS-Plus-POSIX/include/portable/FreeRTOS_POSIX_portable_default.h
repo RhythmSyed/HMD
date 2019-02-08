@@ -1,5 +1,5 @@
 /*
- * Amazon FreeRTOS+POSIX V1.0.2
+ * Amazon FreeRTOS+POSIX V1.0.1
  * Copyright (C) 2018 Amazon.com, Inc. or its affiliates.  All Rights Reserved.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of
@@ -32,21 +32,25 @@
 #define _FREERTOS_POSIX_PORTABLE_DEFAULT_H_
 
 /**
- * @brief The FreeRTOS task name given to pthreads.
+ * @name The FreeRTOS task name given to pthreads.
  */
+/**@{ */
 #ifndef posixconfigPTHREAD_TASK_NAME
-    #define posixconfigPTHREAD_TASK_NAME    "pthread"
+    #define posixconfigPTHREAD_TASK_NAME    "pthread" /**< Task name. */
 #endif
+/**@} */
 
 /**
- * @brief the FreeRTOS timer name given to POSIX timers.
+ * @name the FreeRTOS timer name given to POSIX timers.
  */
+/**@{ */
 #ifndef posixconfigTIMER_NAME
-    #define posixconfigTIMER_NAME    "timer"
+    #define posixconfigTIMER_NAME    "timer" /**< Timer name. */
 #endif
+/**@} */
 
 /**
- * @defgroup Defaults for POSIX message queue implementation.
+ * @name Defaults for POSIX message queue implementation.
  */
 /**@{ */
 #ifndef posixconfigMQ_MAX_MESSAGES
@@ -59,7 +63,7 @@
 /**@} */
 
 /**
- * @defgroup POSIX implementation-dependent constants usually defined in limits.h.
+ * @name POSIX implementation-dependent constants usually defined in limits.h.
  *
  * They are defined here to provide portability between platforms.
  */
@@ -76,7 +80,7 @@
 /**@} */
 
 /**
- * @defgroup Enable typedefs of POSIX types.
+ * @name Enable typedefs of POSIX types.
  *
  * Set these values to 1 or 0 to enable or disable the typedefs, respectively.
  * These typedefs should only be disabled if they conflict with system typedefs.
@@ -132,12 +136,6 @@
 #endif
 #ifndef posixconfigENABLE_TM
     #define posixconfigENABLE_TM                     1 /**< struct tm in time.h */
-#endif
-#ifndef posixconfigENABLE_SEM_T
-    #define posixconfigENABLE_SEM_T                  1 /**< struct sem_t in semaphore.h */
-#endif
-#ifndef posixconfigENABLE_PTHREAD_BARRIER_T
-    #define posixconfigENABLE_PTHREAD_BARRIER_T      1 /**< pthread_barrier_t in sys/types.h */
 #endif
 /**@} */
 

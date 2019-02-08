@@ -1,5 +1,5 @@
 /*
- * Amazon FreeRTOS+POSIX V1.0.2
+ * Amazon FreeRTOS+POSIX V1.0.1
  * Copyright (C) 2018 Amazon.com, Inc. or its affiliates.  All Rights Reserved.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of
@@ -63,11 +63,8 @@ int clock_getcpuclockid( pid_t pid,
     ( void ) pid;
     ( void ) clock_id;
 
-    /* This function is currently unsupported. It will always return -1 and
-     * set errno to EPERM. */
-    errno = EPERM;
-
-    return -1;
+    /* This function is currently unsupported. It will always return EPERM. */
+    return EPERM;
 }
 
 /*-----------------------------------------------------------*/
@@ -104,14 +101,6 @@ int clock_gettime( clockid_t clock_id,
     /* Silence warnings about unused parameters. */
     ( void ) clock_id;
 
-    /* Check tp. */
-    if( tp == NULL )
-    {
-        /* POSIX does not specify this function setting errno for invalid
-         * parameters, so just set the return value. */
-        iStatus = -1;
-    }
-
     if( iStatus == 0 )
     {
         /* Get the current tick count and overflow count. vTaskSetTimeOutState()
@@ -141,7 +130,6 @@ int clock_nanosleep( clockid_t clock_id,
 {
     int iStatus = 0;
     TickType_t xSleepTime = 0;
-    struct timespec xCurrentTime = { 0 };
 
     /* Silence warnings about unused parameters. */
     ( void ) clock_id;
@@ -154,24 +142,13 @@ int clock_nanosleep( clockid_t clock_id,
         iStatus = EINVAL;
     }
 
-    /* Get current time */
-    if( ( iStatus == 0 ) && ( clock_gettime( CLOCK_REALTIME, &xCurrentTime ) != 0 ) )
-    {
-        iStatus = EINVAL;
-    }
-
     if( iStatus == 0 )
     {
         /* Check for absolute time sleep. */
         if( ( flags & TIMER_ABSTIME ) == TIMER_ABSTIME )
         {
-            /* Get current time */
-            if( clock_gettime( CLOCK_REALTIME, &xCurrentTime ) != 0 )
-            {
-                iStatus = EINVAL;
-            }
             /* Get number of ticks until absolute time. */
-            if( ( iStatus == 0 ) && ( UTILS_AbsoluteTimespecToDeltaTicks( rqtp, &xCurrentTime, &xSleepTime ) == 0 ) )
+            if( UTILS_AbsoluteTimespecToTicks( rqtp, &xSleepTime ) == 0 )
             {
                 /* Delay until absolute time if vTaskDelayUntil is available. */
                 #if ( INCLUDE_vTaskDelayUntil == 1 )

@@ -1,5 +1,5 @@
 /*
- * Amazon FreeRTOS V1.4.6
+ * Amazon FreeRTOS V1.4.4
  * Copyright (C) 2018 Amazon.com, Inc. or its affiliates.  All Rights Reserved.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of
@@ -24,6 +24,7 @@
  */
 
 /* FreeRTOS includes. */
+
 #include "FreeRTOS.h"
 #include "task.h"
 
@@ -32,6 +33,7 @@
 #include "aws_dev_mode_key_provisioning.h"
 
 /* AWS System includes. */
+#include "bt_hal_manager.h"
 #include "aws_system_init.h"
 #include "aws_logging_task.h"
 #include "aws_wifi.h"
@@ -43,26 +45,31 @@
 #include "esp_system.h"
 #include "esp_wifi.h"
 #include "esp_interface.h"
-
-/* Application version info. */
+#include "esp_gap_ble_api.h"
+#include "esp_bt.h"
+#include "esp_bt_main.h"
+#include "bt_hal_manager_adapter_ble.h"
+#include "bt_hal_manager.h"
+#include "bt_hal_gatt_server.h"
+#include "semphr.h"
+#include "driver/uart.h"
 #include "aws_application_version.h"
+#include "aws_iot_network.h"
+#include "aws_iot_network_manager.h"
+
+
+#if BLE_ENABLED
+#include <aws_ble.h>
+#include "aws_ble_config.h"
+#include "aws_ble_services_init.h"
+#include "aws_ble_wifi_provisioning.h"
+#include "aws_ble_numericComparison.h"
+#endif
 
 /* Logging Task Defines. */
 #define mainLOGGING_MESSAGE_QUEUE_LENGTH    ( 32 )
-#define mainLOGGING_TASK_STACK_SIZE         ( configMINIMAL_STACK_SIZE * 6 )
+#define mainLOGGING_TASK_STACK_SIZE         ( configMINIMAL_STACK_SIZE * 4 )
 #define mainDEVICE_NICK_NAME                "Espressif_Demo"
-
-// blink LED
-#include <stdio.h>
-#include "driver/gpio.h"
-#include "sdkconfig.h"
-
-// Heart Rate sensor
-#include <driver/adc.h>
-
-#define BLINK_GPIO 5
-
-#include "hmdAWS_connectivity.h"
 
 /* Declare the firmware version structure for all to see. */
 const AppVersion32_t xAppFirmwareVersion = {
@@ -71,9 +78,11 @@ const AppVersion32_t xAppFirmwareVersion = {
    .u.x.usBuild = APP_VERSION_BUILD,
 };
 
+QueueHandle_t spp_uart_queue = NULL;
+
 /* Static arrays for FreeRTOS+TCP stack initialization for Ethernet network connections
- * are use are below. If you are using an Ethernet connection on your MCU device it is 
- * recommended to use the FreeRTOS+TCP stack. The default values are defined in 
+ * are use are below. If you are using an Ethernet connection on your MCU device it is
+ * recommended to use the FreeRTOS+TCP stack. The default values are defined in
  * FreeRTOSConfig.h. */
 
 /* Default MAC address configuration.  The demo creates a virtual network
@@ -131,47 +140,29 @@ static const uint8_t ucDNSServerAddress[ 4 ] =
 void vApplicationDaemonTaskStartupHook( void );
 
 /**
- * @brief Connects to WiFi.
- */
-static void prvWifiConnect( void );
-
-/**
  * @brief Initializes the board.
  */
 static void prvMiscInitialization( void );
+
+#if BLE_ENABLED
+/* Initializes bluetooth */
+static esp_err_t prvBLEStackInit( void );
+
+static void spp_uart_init(void);
+
+#endif
 /*-----------------------------------------------------------*/
 
 /**
  * @brief Application runtime entry point.
  */
- 
-void blink_task(void *pvParameter)
-{
-    /* Configure the IOMUX register for pad BLINK_GPIO (some pads are
-       muxed to GPIO on reset already, but some default to other
-       functions and need to be switched to GPIO. Consult the
-       Technical Reference for a list of pads and their default
-       functions.)
-    */
-    gpio_pad_select_gpio(BLINK_GPIO);
-    /* Set the GPIO as a push/pull output */
-    gpio_set_direction(BLINK_GPIO, GPIO_MODE_OUTPUT);
-    while(1) {
-        /* Blink off (output low) */
-        gpio_set_level(BLINK_GPIO, 0);
-        vTaskDelay(1000 / portTICK_PERIOD_MS);
-        /* Blink on (output high) */
-        gpio_set_level(BLINK_GPIO, 1);
-        vTaskDelay(1000 / portTICK_PERIOD_MS);
-    }
-}
-
 int app_main( void )
 {
-    /* Perform any hardware initialization that does not require the RTOS to be
-     * running.  */
-    prvMiscInitialization();
-    	/* Create tasks that are not dependent on the WiFi being initialized. */
+	uint32_t ulEnabledNetworks;
+	 /* Perform any hardware initialization that does not require the RTOS to be
+	     * running.  */
+
+	/* Create tasks that are not dependent on the WiFi being initialized. */
     xLoggingTaskInitialize( mainLOGGING_TASK_STACK_SIZE,
 							tskIDLE_PRIORITY + 5,
 							mainLOGGING_MESSAGE_QUEUE_LENGTH );
@@ -181,60 +172,44 @@ int app_main( void )
             ucDNSServerAddress,
             ucMACAddress );
 
-     gpio_pad_select_gpio(2);
-     gpio_set_direction(2, GPIO_MODE_INPUT);
+    prvMiscInitialization();
 
     if( SYSTEM_Init() == pdPASS )
     {
-        prvWifiConnect();
+        //prvWifiConnect();
+        vDevModeKeyProvisioning();
 
-        //initializeAWS_hmd();
+#if BLE_ENABLED
+        /* Initialize BLE. */
+        if( prvBLEStackInit() != eBTStatusSuccess )
+        {
+        	configPRINTF(("Failed to initialize the bluetooth stack\n "));
+        	while( 1 )
+        	{
 
-        //while (gpio_get_level(2) == 0) {
-        //}
-        bool down = false;
-        int down_count = 0;
-        bool up = false;
-        int up_count = 0;
-        while (1){
-        
-            adc1_config_width(ADC_WIDTH_BIT_12);
-            adc1_config_channel_atten(ADC1_CHANNEL_0,ADC_ATTEN_DB_11);
-            int val = adc1_get_raw(ADC1_CHANNEL_0);
-            
-            //configPRINTF( ( "\nADC Val: %d \r\n", val ) );
-
-            if( val >1735 && val < 3500){
-                //configPRINTF( ( "ADC Val: %d \r\n", val ) );
-
-            }
-            if( val < 1753){
-                down = true;
-                down_count++;
-            }
-            if(down_count > 10 && val > 1812){
-                up = true;
-                up_count++;
-            }
-            if( up_count > 10 && val < 1812){
-                configPRINTF( ( "BEAT! ADC Val: %d \r\n", val ) );
-                down = false;
-                down_count = 0;
-                up_count = 0;
-                up = false;
-            }
-            //need to find vefuse for chip
-            //should hover around 1735
-            //if heart beat goes up .5V, then goes up 525 points
-
-            //wrist, low 1611, target thresh 1753
-            //high 1913, target thresh 1812
-            
-
+        	}
         }
-        //prvPublishNextMessage(1);
+#endif
+        if( AwsIotNetworkManager_Init() != pdPASS )
+        {
+        	configPRINTF(("Failed to initialize the network manager \n "));
+        	while( 1 )
+        	{
 
-        
+        	}
+        }
+
+        ulEnabledNetworks = AwsIotNetworkManager_EnableNetwork( configENABLED_NETWORKS );
+        if( ( ulEnabledNetworks & configENABLED_NETWORKS ) !=  configENABLED_NETWORKS )
+        {
+        	configPRINTF(("Failed to enable all the networks, enabled networks: %08x\n ", ulEnabledNetworks ));
+        	while( 1 )
+        	{
+
+        	}
+        }
+        /* Run all demos. */
+        DEMO_RUNNER_RunDemos();
     }
 
     /* Start the scheduler.  Initialization that requires the OS to be running,
@@ -242,9 +217,6 @@ int app_main( void )
      * startup hook. */
     // Following is taken care by initialization code in ESP IDF
     // vTaskStartScheduler();
-	
-	//xTaskCreate(&blink_task, "blink_task", configMINIMAL_STACK_SIZE, NULL, 5, NULL);
-
     return 0;
 }
 
@@ -252,14 +224,24 @@ int app_main( void )
 
 static void prvMiscInitialization( void )
 {
+
+
 	// Initialize NVS
 	esp_err_t ret = nvs_flash_init();
-	if (ret == ESP_ERR_NVS_NO_FREE_PAGES) {
+	if (ret == ESP_ERR_NVS_NO_FREE_PAGES || ret == ESP_ERR_NVS_NEW_VERSION_FOUND) {
 		ESP_ERROR_CHECK(nvs_flash_erase());
 		ret = nvs_flash_init();
 	}
 	ESP_ERROR_CHECK( ret );
+
+   #if BLE_ENABLED
+   NumericComparisonInit();
+   spp_uart_init();
+   #endif
 }
+
+
+
 /*-----------------------------------------------------------*/
 
 void vApplicationDaemonTaskStartupHook( void )
@@ -267,49 +249,48 @@ void vApplicationDaemonTaskStartupHook( void )
 }
 /*-----------------------------------------------------------*/
 
-void prvWifiConnect( void )
+#if BLE_ENABLED
+static esp_err_t prvBLEStackInit( void )
 {
-    WIFINetworkParams_t xNetworkParams;
-    WIFIReturnCode_t xWifiStatus;
+    /* Initialize BLE */
+    esp_err_t xRet = ESP_OK;
+    esp_bt_controller_config_t xBtCfg = BT_CONTROLLER_INIT_CONFIG_DEFAULT();
 
-    xWifiStatus = WIFI_On();
 
-    if( xWifiStatus == eWiFiSuccess )
+    ESP_ERROR_CHECK( esp_bt_controller_mem_release( ESP_BT_MODE_CLASSIC_BT ) );
+
+    xRet = esp_bt_controller_init( &xBtCfg );
+
+    if( xRet == ESP_OK )
     {
-        configPRINTF( ( "WiFi module initialized. Connecting to AP %s...\r\n", clientcredentialWIFI_SSID ) );
+        xRet = esp_bt_controller_enable( ESP_BT_MODE_BLE );
     }
     else
     {
-        configPRINTF( ( "WiFi module failed to initialize.\r\n" ) );
-
-        while( 1 )
-        {
-        }
+        configPRINTF( ( "Failed to initialize bt controller, err = %d", xRet ) );
     }
 
-    /* Setup parameters. */
-    xNetworkParams.pcSSID = clientcredentialWIFI_SSID;
-    xNetworkParams.ucSSIDLength = sizeof( clientcredentialWIFI_SSID );
-    xNetworkParams.pcPassword = clientcredentialWIFI_PASSWORD;
-    xNetworkParams.ucPasswordLength = sizeof( clientcredentialWIFI_PASSWORD );
-    xNetworkParams.xSecurity = clientcredentialWIFI_SECURITY;
-
-    xWifiStatus = WIFI_ConnectAP( &( xNetworkParams ) );
-
-    if( xWifiStatus == eWiFiSuccess )
+    if( xRet == ESP_OK )
     {
-        configPRINTF( ( "WiFi Connected to AP. Creating tasks which use network...\r\n" ) );
+        xRet = esp_bluedroid_init();
     }
     else
     {
-        configPRINTF( ( "WiFi failed to connect to AP.\r\n" ) );
-
-        portDISABLE_INTERRUPTS();
-        while( 1 )
-        {
-        }
+        configPRINTF( ( "Failed to initialize bluedroid stack, err = %d", xRet ) );
     }
+
+    if( xRet == ESP_OK )
+    {
+        xRet = esp_bluedroid_enable();
+    }
+
+
+    return xRet;
 }
+
+
+#endif
+
 /*-----------------------------------------------------------*/
 /* configUSE_STATIC_ALLOCATION is set to 1, so the application must provide an
  * implementation of vApplicationGetIdleTaskMemory() to provide the memory that is
@@ -369,7 +350,7 @@ void vApplicationGetTimerTaskMemory( StaticTask_t ** ppxTimerTaskTCBBuffer,
 
 const char * pcApplicationHostnameHook( void )
 {
-    /* This function will be called during the DHCP: the machine will be registered 
+    /* This function will be called during the DHCP: the machine will be registered
      * with an IP address plus this name. */
     return clientcredentialIOT_THING_NAME;
 }
@@ -480,3 +461,52 @@ void vApplicationIPNetworkEventHook( eIPCallbackEvent_t eNetworkEvent )
         esp_event_send(&evt);
     }
 }
+#if BLE_ENABLED
+static void spp_uart_init(void)
+{
+    uart_config_t uart_config = {
+        .baud_rate = 115200,
+        .data_bits = UART_DATA_8_BITS,
+        .parity = UART_PARITY_DISABLE,
+        .stop_bits = UART_STOP_BITS_1,
+        .flow_ctrl = UART_HW_FLOWCTRL_RTS,
+        .rx_flow_ctrl_thresh = 122,
+    };
+
+    /* Set UART parameters */
+    uart_param_config(UART_NUM_0, &uart_config);
+    //Set UART pins
+    uart_set_pin(UART_NUM_0, UART_PIN_NO_CHANGE, UART_PIN_NO_CHANGE, UART_PIN_NO_CHANGE, UART_PIN_NO_CHANGE);
+    //Install UART driver, and get the queue.
+    uart_driver_install(UART_NUM_0, 4096, 8192, 10,&spp_uart_queue,0);
+}
+
+BaseType_t getUserMessage( INPUTMessage_t * pxINPUTmessage, TickType_t xAuthTimeout )
+{
+	uart_event_t xEvent;
+	BaseType_t xReturnMessage = pdFALSE;
+
+	if (xQueueReceive(spp_uart_queue, (void * )&xEvent, (portTickType) xAuthTimeout )) {
+		switch (xEvent.type) {
+		//Event of UART receiving data
+		case UART_DATA:
+			if (xEvent.size) {
+				pxINPUTmessage->pcData = (uint8_t *)malloc(sizeof(uint8_t)*xEvent.size);
+				if(pxINPUTmessage->pcData != NULL){
+					memset(pxINPUTmessage->pcData,0x0,xEvent.size);
+					uart_read_bytes(UART_NUM_0, (uint8_t *)pxINPUTmessage->pcData,xEvent.size,portMAX_DELAY);
+					xReturnMessage = pdTRUE;
+				}else
+				{
+					configPRINTF(("Malloc failed in main.c\n"));
+				}
+			}
+			break;
+		default:
+			break;
+		}
+	}
+
+	return xReturnMessage;
+}
+#endif
