@@ -57,6 +57,9 @@
 #include "aws_iot_network.h"
 #include "aws_iot_network_manager.h"
 
+/* Heart Beat Sensor */
+#include "heart_beat.h"
+
 
 #if BLE_ENABLED
 #include <aws_ble.h>
@@ -217,6 +220,10 @@ int app_main( void )
      * startup hook. */
     // Following is taken care by initialization code in ESP IDF
     // vTaskStartScheduler();
+
+    /* Run the heart rate sesnor */
+    int bpm = runBPM();
+
     return 0;
 }
 
