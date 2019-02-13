@@ -5,63 +5,68 @@
 #include "esp_event_loop.h"
 #include "nvs_flash.h"
 #include "driver/gpio.h"
-#include "heartrate_sensor.h"
-#include "freertos/timers.h"
-#include <driver/adc.h>
+#include "features_header.h"
+#include <stdio.h>
+#include <string.h>
+#include "freertos/task.h"
+#include "esp_bt.h"
+#include "esp_log.h"
+static const char *tag = "BLE_ADV";
+
 
 esp_err_t event_handler(void *ctx, system_event_t *event)
 {
     return ESP_OK;
 }
 
+
 void blink_task(void *pvParameter)
 {
-    /* Configure the IOMUX register for pad BLINK_GPIO (some pads are
-       muxed to GPIO on reset already, but some default to other
-       functions and need to be switched to GPIO. Consult the
-       Technical Reference for a list of pads and their default
-       functions.)
-    */
+
     gpio_pad_select_gpio(GPIO_NUM_5);
-    /* Set the GPIO as a push/pull output */
     gpio_set_direction(GPIO_NUM_5, GPIO_MODE_OUTPUT);
+
     while(1) {
-        /* Blink off (output low) */
         gpio_set_level(GPIO_NUM_5, 0);
         vTaskDelay(1000 / portTICK_PERIOD_MS);
-        /* Blink on (output high) */
         gpio_set_level(GPIO_NUM_5, 1);
         vTaskDelay(1000 / portTICK_PERIOD_MS);
     }
+
 }
 
-
-void hmd_system_init() {
-    nvs_flash_init();
-    tcpip_adapter_init();
-    ESP_ERROR_CHECK( esp_event_loop_init(event_handler, NULL) );
-    wifi_init_config_t cfg = WIFI_INIT_CONFIG_DEFAULT();
-    ESP_ERROR_CHECK( esp_wifi_init(&cfg) );
-    ESP_ERROR_CHECK( esp_wifi_set_storage(WIFI_STORAGE_RAM) );
-    ESP_ERROR_CHECK( esp_wifi_set_mode(WIFI_MODE_STA) );
-    wifi_config_t sta_config = {
-        .sta = {
-            .ssid = CONFIG_ESP_WIFI_SSID,
-            .password = CONFIG_ESP_WIFI_PASSWORD,
-            .bssid_set = false
-        }
-    };
-    ESP_ERROR_CHECK( esp_wifi_set_config(WIFI_IF_STA, &sta_config) );
-    ESP_ERROR_CHECK( esp_wifi_start() );
-    ESP_ERROR_CHECK( esp_wifi_connect() );
-}
 
 void app_main(void)
 {
-    // initializations and status checks
-    hmd_system_init();
+    // BLE inits
+    esp_err_t ret = nvs_flash_init();
+    if (ret == ESP_ERR_NVS_NO_FREE_PAGES || ret == ESP_ERR_NVS_NEW_VERSION_FOUND) {
+        ESP_ERROR_CHECK(nvs_flash_erase());
+        ret = nvs_flash_init();
+    }
+    ESP_ERROR_CHECK( ret );
+    esp_bt_controller_config_t bt_cfg = BT_CONTROLLER_INIT_CONFIG_DEFAULT();
 
+    ret = esp_bt_controller_mem_release(ESP_BT_MODE_CLASSIC_BT);
+    if (ret) {
+        ESP_LOGI(tag, "Bluetooth controller release classic bt memory failed: %s", esp_err_to_name(ret));
+        return;
+    }
+
+    if ((ret = esp_bt_controller_init(&bt_cfg)) != ESP_OK) {
+        ESP_LOGI(tag, "Bluetooth controller initialize failed: %s", esp_err_to_name(ret));
+        return;
+    }
+
+    if ((ret = esp_bt_controller_enable(ESP_BT_MODE_BLE)) != ESP_OK) {
+        ESP_LOGI(tag, "Bluetooth controller enable failed: %s", esp_err_to_name(ret));
+        return;
+    }
+
+
+    // Main tasks
+    xTaskCreatePinnedToCore(&bleAdvtTask, "bleAdvtTask", 2048, NULL, 5, NULL, 0);
     xTaskCreate(&get_BPM, "get_BPM", 4096, NULL, 5, NULL);
     xTaskCreate(&blink_task, "blink_task", configMINIMAL_STACK_SIZE, NULL, 5, NULL);
-}
 
+}

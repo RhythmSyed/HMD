@@ -1,10 +1,9 @@
 #include "freertos/FreeRTOS.h"
 
-
 // Heart Rate sensor
 #include <driver/adc.h>
 #include "freertos/timers.h"
-#include "heartrate_sensor.h"
+#include "features_header.h"
 
 
 
