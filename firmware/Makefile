@@ -5,5 +5,5 @@
 
 PROJECT_NAME := hmd_firmware
 
-include $(IDF_PATH)/make/project.mk
+include $(PWD)/../esp-idf/make/project.mk
 

@@ -89,7 +89,7 @@ void get_BPM(void *pvParameter) {
         //wrist, low 1611, target thresh 1753
         //high 1913, target thresh 1812
         
-        vTaskDelay(10 / portTICK_PERIOD_MS);            // gets rid of watchdog timer error
+        //vTaskDelay(10 / portTICK_PERIOD_MS);            // gets rid of watchdog timer error
 
     }
 }

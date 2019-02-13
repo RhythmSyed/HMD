@@ -11,6 +11,7 @@ const device = awsIot.device({
     secretKey: "UsILxwbhlBz99pe3r42CqOi3EmI43iXeI3i54dpy"
 });
 
+counter = 0;
 
 class Splash extends Component {
     render() {
@@ -33,7 +34,7 @@ class Splash extends Component {
 
                 <View style={styles.button}>
                     <Button title="Send Instruction" onPress={()=> {
-                        device.publish('hmd_test', JSON.stringify(1))    
+                        device.publish('hmd_test', JSON.stringify(counter+'H'))    
                     }}/>
                 </View>
 
