@@ -25,6 +25,8 @@ target 'mobileProject' do
     pod 'react-native-google-maps', path: '../node_modules/react-native-maps/'  # <~~ if you need GoogleMaps support on iOS
   pod 'RNAWSCognito', :path => '../node_modules/amazon-cognito-identity-js'
 
+  pod 'react-native-ble-plx', :path => '../node_modules/react-native-ble-plx'
+
 end
 post_install do |installer|
     installer.pods_project.targets.each do |target|

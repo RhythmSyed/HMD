@@ -2,28 +2,26 @@ import React, { Component } from 'react';
 import { StyleSheet, Text, View, Button, Alert } from 'react-native';
 import awsIot from 'aws-iot-device-sdk';
 
-/* 
-    Simple title screen that does nothing but waits for a fall
-*/
 
 const device = awsIot.device({
-    host: "a2pv8pigeo9wbh-ats.iot.us-east-2.amazonaws.com",
+    host: "a358ffdo7gf05m-ats.iot.us-east-2.amazonaws.com",
     clientId: Math.random(),
     protocol: "wss",
-    accessKeyId: "AKIAJBDBZHG3VXU5TLQQ",
-    secretKey: "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"
+    accessKeyId: "AKIAIUIKD4PNBBO2TT5A",
+    secretKey: "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"
 });
+
 
 class Splash extends Component {
     render() {
-        device.on('connect', () => {    // Subscription tag, this is where the MCU publishes a fall detected
-            device.subscribe('upload_topic')
+        device.on('connect', () => {   
+            //device.subscribe('upload_topic')
         })
 
-        device.on('message', (topic, message) => {
-            console.log(topic, message.toString())
-            this.props.navigation.navigate('Countdown')
-        })
+        // device.on('message', (topic, message) => {
+        //     console.log(topic, message.toString())
+        //     this.props.navigation.navigate('Countdown')
+        // })
           
         device.on('error', error => {
             console.log(error)
@@ -32,6 +30,9 @@ class Splash extends Component {
         return (
             <View style={styles.container}>
                 <Text style={styles.title}>HMD: Health Monitoring Device</Text>
+                <Button title="Send Instruction" onPress={()=> {
+                    device.publish('hmd_test', JSON.stringify(1))    
+                }}/>
             </View>
         );
     }
