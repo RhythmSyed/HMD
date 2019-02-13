@@ -1,9 +1,8 @@
 import React, {Component} from 'react';
 import { createStackNavigator } from 'react-navigation';
 
-import Locator from './screens/Locator';
 import Splash from './screens/Splash';
-import Countdown from './screens/Countdown';
+import BLE from './screens/BLE';
 
 export default class App extends Component {
   render() {
@@ -15,8 +14,7 @@ export default class App extends Component {
 
 const StackNav = createStackNavigator({
   Splash: Splash,
-  Countdown: Countdown,
-  Locator: Locator
+  BLE: BLE
 });
 
 

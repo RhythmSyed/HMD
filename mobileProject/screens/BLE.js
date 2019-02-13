@@ -64,8 +64,8 @@ export default class SensorsComponent extends Component {
         return
         }
 
-        if (device.name === 'ESP32') {
-        this.info("Connecting to ESP32")
+        if (device.name === 'HMD_wearable') {
+        this.info("Connecting to HMD")
         this.manager.stopDeviceScan()
         device.connect()
             // .then((device) => {
