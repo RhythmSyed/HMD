@@ -3,7 +3,7 @@
 // Heart Rate sensor
 #include <driver/adc.h>
 #include "freertos/timers.h"
-#include "features_header.h"
+#include "features.h"
 
 
 
@@ -17,7 +17,7 @@ void BPMTimerCallback( TimerHandle_t xTimer ){
 }
 
 
-void get_BPM(void *pvParameter) {
+void getBPM_task(void *pvParameter) {
     /* Create timer to count for BPM*/
     TimerHandle_t bmp_timer;
     bmp_timer = xTimerCreate( "Timer", pdMS_TO_TICKS( 10 ), pdTRUE, ( void * ) 0, BPMTimerCallback );
