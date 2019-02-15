@@ -13,14 +13,12 @@
 #include "esp_log.h"
 static const char *tag = "BLE_ADV";
 
-extern "C" {
-	void app_main(void);
-}
 
 esp_err_t event_handler(void *ctx, system_event_t *event)
 {
     return ESP_OK;
 }
+
 
 void app_main(void)
 {
@@ -51,9 +49,9 @@ void app_main(void)
 
 
     // Main tasks
-    //xTaskCreatePinnedToCore(&bleAdvt_task, "bleAdvt_task", 2048, NULL, 5, NULL, 0);
-    //xTaskCreate(&getBPM_task, "getBPM_task", 4096, NULL, 5, NULL);
-    //xTaskCreate(&blink_task, "blink_task", configMINIMAL_STACK_SIZE, NULL, 5, NULL);
+    xTaskCreatePinnedToCore(&bleAdvt_task, "bleAdvt_task", 2048, NULL, 5, NULL, 0);
+    xTaskCreate(&getBPM_task, "getBPM_task", 4096, NULL, 5, NULL);
+    xTaskCreate(&blink_task, "blink_task", configMINIMAL_STACK_SIZE, NULL, 5, NULL);
     xTaskCreate(&MPU_task, "MPU_task", 4096, NULL, 5, NULL);
 
 }

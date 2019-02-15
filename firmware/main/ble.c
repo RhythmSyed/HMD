@@ -1,3 +1,6 @@
+
+// Attribution: esp-idf BLE examples: BLE Advertisement
+
 #include <stdio.h>
 #include <string.h>
 #include "freertos/FreeRTOS.h"
