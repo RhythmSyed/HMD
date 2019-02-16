@@ -1,3 +1,6 @@
+
+// Attribution: esp-idf BLE examples: BLE Advertisement
+
 #include <stdio.h>
 #include <string.h>
 #include "freertos/FreeRTOS.h"
@@ -5,7 +8,7 @@
 #include "esp_bt.h"
 #include "esp_log.h"
 #include "nvs_flash.h"
-#include "features_header.h"
+#include "features.h"
 
 #define HCI_H4_CMD_PREAMBLE_SIZE           (4)
 
@@ -180,7 +183,7 @@ static void hci_cmd_send_ble_set_adv_data(void)
 /*
  * @brief: send HCI commands to perform BLE advertising;
  */
-void bleAdvtTask(void *pvParameters)
+void bleAdvt_task(void *pvParameters)
 {
     int cmd_cnt = 0;
     bool send_avail = false;

@@ -3,8 +3,9 @@
 // Heart Rate sensor
 #include <driver/adc.h>
 #include "freertos/timers.h"
-#include "features_header.h"
+#include "features.h"
 
+// fixes watchdog timer issue
 #include "soc/timer_group_struct.h"
 #include "soc/timer_group_reg.h"
 
@@ -20,7 +21,7 @@ void BPMTimerCallback( TimerHandle_t xTimer ){
 }
 
 
-void get_BPM(void *pvParameter) {
+void getBPM_task(void *pvParameter) {
     /* Create timer to count for BPM*/
     TimerHandle_t bmp_timer;
     bmp_timer = xTimerCreate( "Timer", pdMS_TO_TICKS( 10 ), pdTRUE, ( void * ) 0, BPMTimerCallback );
@@ -48,10 +49,12 @@ void get_BPM(void *pvParameter) {
     uint32_t bpm = 0;
     while (1) {
 
+        
+        /* fixes watchdog timer issue */
         TIMERG0.wdt_wprotect=TIMG_WDT_WKEY_VALUE;
         TIMERG0.wdt_feed=1;
         TIMERG0.wdt_wprotect=0;
-        
+
         /* The value from the adc for Heart Beat sensor */
         hrt_bt_adc_val = adc1_get_raw(ADC1_CHANNEL_0);
 
@@ -95,8 +98,6 @@ void get_BPM(void *pvParameter) {
 
         //wrist, low 1611, target thresh 1753
         //high 1913, target thresh 1812
-        
-        //vTaskDelay(10 / portTICK_PERIOD_MS);            // gets rid of watchdog timer error
 
     }
 }
