@@ -65,8 +65,9 @@ void app_main(void)
 
 
     // Main tasks
-    xTaskCreatePinnedToCore(&bleAdvtTask, "bleAdvtTask", 2048, NULL, 5, NULL, 0);
+    //xTaskCreatePinnedToCore(&bleAdvtTask, "bleAdvtTask", 2048, NULL, 5, NULL, 0);
     xTaskCreate(&get_BPM, "get_BPM", 4096, NULL, 5, NULL);
     xTaskCreate(&blink_task, "blink_task", configMINIMAL_STACK_SIZE, NULL, 5, NULL);
+    xTaskCreate(&e_paper_task, "epaper_task", 4 * 1024, NULL, 5, NULL);
 
 }

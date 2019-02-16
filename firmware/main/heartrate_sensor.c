@@ -5,6 +5,9 @@
 #include "freertos/timers.h"
 #include "features_header.h"
 
+#include "soc/timer_group_struct.h"
+#include "soc/timer_group_reg.h"
+
 
 
 void BPMTimerCallback( TimerHandle_t xTimer ){
@@ -44,6 +47,10 @@ void get_BPM(void *pvParameter) {
     uint8_t bufferWriteIndex = 0;
     uint32_t bpm = 0;
     while (1) {
+
+        TIMERG0.wdt_wprotect=TIMG_WDT_WKEY_VALUE;
+        TIMERG0.wdt_feed=1;
+        TIMERG0.wdt_wprotect=0;
         
         /* The value from the adc for Heart Beat sensor */
         hrt_bt_adc_val = adc1_get_raw(ADC1_CHANNEL_0);
