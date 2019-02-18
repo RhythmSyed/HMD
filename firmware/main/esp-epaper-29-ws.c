@@ -60,15 +60,15 @@ void e_paper_task(void *pvParameter)
     uint32_t cnt = 0;
     char hum_str[7];
     char tsens_str[7];
-
-    while(1){
-        ESP_LOGI(TAG, "Before ePaper driver init, heap: %d", esp_get_free_heap_size());
+    ESP_LOGI(TAG, "Before ePaper driver init, heap: %d", esp_get_free_heap_size());
         device = iot_epaper_create(NULL, &epaper_conf);
+    while(1){
+        
         //iot_epaper_set_rotate(device, E_PAPER_ROTATE_270);
         ESP_LOGI(TAG, "e-Paper Display Espressif logo");
         iot_epaper_display_frame(device, IMAGE_DATA); // display IMAGE_DATA
         vTaskDelay(5000 / portTICK_PERIOD_MS);
-
+    /*
         ESP_LOGI(TAG, "e-Paper Display sample graphics");
         iot_epaper_clean_paint(device, UNCOLORED);
         iot_epaper_draw_string(device, 200, 0, "@espressif", &epaper_font_12, COLORED);
@@ -92,8 +92,9 @@ void e_paper_task(void *pvParameter)
 
         ESP_LOGI(TAG, "EPD Display update count: %d", cnt++);
         ESP_LOGI(TAG, "After ePaper driver delete, heap: %d", esp_get_free_heap_size());
-
+    
         vTaskDelay(5000 / portTICK_PERIOD_MS);
+        */
     }
 }
 
