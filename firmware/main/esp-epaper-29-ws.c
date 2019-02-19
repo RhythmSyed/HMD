@@ -57,20 +57,22 @@ void e_paper_task(void *pvParameter)
         .color_inv = 1,
     };
 
-    uint32_t cnt = 0;
-    char hum_str[7];
-    char tsens_str[7];
-    ESP_LOGI(TAG, "Before ePaper driver init, heap: %d", esp_get_free_heap_size());
-        device = iot_epaper_create(NULL, &epaper_conf);
     while(1){
-        
-        //iot_epaper_set_rotate(device, E_PAPER_ROTATE_270);
-        ESP_LOGI(TAG, "e-Paper Display Espressif logo");
+        //ESP_LOGI(TAG, "Before ePaper driver init, heap: %d", esp_get_free_heap_size());
+        device = iot_epaper_create(NULL, &epaper_conf); //create drive to come out of sleep mode
+        iot_epaper_set_rotate(device, E_PAPER_ROTATE_270);
         iot_epaper_display_frame(device, IMAGE_DATA); // display IMAGE_DATA
+        vTaskDelay(5000 / portTICK_PERIOD_MS);
+        iot_epaper_clean_paint(device, UNCOLORED); // set screen to white
+        iot_epaper_draw_string(device, 10, 10, "HMD DEMO ", &epaper_font_24, COLORED); //colored is black
+        iot_epaper_draw_rectangle(device, 5, 5, 195, 40, COLORED);
+        iot_epaper_display_frame(device, NULL); // display internal frame buffer
+        iot_epaper_delete(device, true);// delete drive to enter into sleep mode
+        //ESP_LOGI(TAG, "After ePaper driver delete, heap: %d", esp_get_free_heap_size());
         vTaskDelay(5000 / portTICK_PERIOD_MS);
     /*
         ESP_LOGI(TAG, "e-Paper Display sample graphics");
-        iot_epaper_clean_paint(device, UNCOLORED);
+       
         iot_epaper_draw_string(device, 200, 0, "@espressif", &epaper_font_12, COLORED);
         iot_epaper_draw_string(device, 10, 10, "e-Paper Demo ", &epaper_font_16, COLORED);
 
@@ -88,8 +90,7 @@ void e_paper_task(void *pvParameter)
         iot_epaper_draw_vertical_line(device, 150, 43, 60, COLORED);
         iot_epaper_draw_rectangle(device, 10, 43, 250, 103, COLORED);
         iot_epaper_display_frame(device, NULL); // display internal frame buffer
-        iot_epaper_delete(device, true);
-
+        
         ESP_LOGI(TAG, "EPD Display update count: %d", cnt++);
         ESP_LOGI(TAG, "After ePaper driver delete, heap: %d", esp_get_free_heap_size());
     
