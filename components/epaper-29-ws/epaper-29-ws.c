@@ -154,6 +154,7 @@ static void iot_epaper_gpio_init(epaper_conf_t * pin)
     gpio_set_pull_mode(pin->busy_pin, GPIO_PULLUP_ONLY);
 }
 
+//Depricated, moved into esp-epaper-29-ws.c
 static esp_err_t iot_epaper_spi_init(epaper_handle_t dev, spi_device_handle_t *e_spi, epaper_conf_t *pin)
 {
     esp_err_t ret;
@@ -240,7 +241,7 @@ epaper_handle_t iot_epaper_create(spi_device_handle_t bus, epaper_conf_t *epconf
         ESP_LOGE(TAG, "frame_buffer malloc fail");
         return NULL;
     }
-    iot_epaper_gpio_init(epconf);
+    //iot_epaper_gpio_init(epconf);
     ESP_LOGD(TAG, "gpio init ok");
     if (bus) {
         dev->bus = bus;

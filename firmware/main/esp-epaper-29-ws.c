@@ -16,7 +16,10 @@
 #include "epaper-29-ws.h"
 #include "epaper_fonts.h"
 
-static const char *TAG = "ePaper Example";
+
+#include "driver/gpio.h"
+#include "driver/spi_master.h"
+
 
 // Pin definition of the ePaper module
 #define MOSI_PIN     5
@@ -29,6 +32,22 @@ static const char *TAG = "ePaper Example";
 
 // Color inverse. 1 or 0 = set or reset a bit if set a colored pixel
 #define IF_INVERT_COLOR 1
+
+
+static void epaper_gpio_init(epaper_conf_t * pin)
+{
+    gpio_pad_select_gpio(pin->reset_pin);
+    gpio_set_direction(pin->reset_pin, GPIO_MODE_OUTPUT);
+    gpio_set_level(pin->reset_pin, pin->rst_active_level);
+    gpio_pad_select_gpio(pin->dc_pin);
+    gpio_set_direction(pin->dc_pin, GPIO_MODE_OUTPUT);
+    gpio_set_level(pin->dc_pin, 1);
+    ets_delay_us(10000);
+    gpio_set_level(pin->dc_pin, 0);
+    gpio_pad_select_gpio(pin->busy_pin);
+    gpio_set_direction(pin->busy_pin, GPIO_MODE_INPUT);
+    gpio_set_pull_mode(pin->busy_pin, GPIO_PULLUP_ONLY);
+}
 
 void e_paper_task(void *pvParameter)
 {
@@ -89,6 +108,7 @@ void e_paper_task(void *pvParameter)
         assert(ret == ESP_OK);
         ret = spi_bus_add_device(epaper_conf.spi_host, &devcfg, &e_spi);
         assert(ret == ESP_OK);
+        epaper_gpio_init(&epaper_conf);
 
         device = iot_epaper_create(e_spi, &epaper_conf); //create drive to come out of sleep mode
         iot_epaper_set_rotate(device, E_PAPER_ROTATE_270);
@@ -130,6 +150,8 @@ void e_paper_task(void *pvParameter)
         */
     }
 }
+
+
 
 /*
 static esp_err_t iot_epaper_spi_init(epaper_handle_t dev, spi_device_handle_t *e_spi, epaper_conf_t *pin)
