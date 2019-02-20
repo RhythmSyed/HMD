@@ -32,7 +32,7 @@
 
 static const char* TAG = "ePaper Driver";
 
-#define EPAPER_QUE_SIZE_DEFAULT 10
+
 
 const unsigned char lut_full_update[] =
 {
@@ -76,7 +76,7 @@ typedef struct {
 /* This function is called (in irq context!) just before a transmission starts.
  * It will set the D/C line to the value indicated in the user field
  */
-static void iot_epaper_pre_transfer_callback(spi_transaction_t *t)
+void iot_epaper_pre_transfer_callback(spi_transaction_t *t)
 {
     epaper_dc_t *dc = (epaper_dc_t *) t->user;
     gpio_set_level((int)dc->dc_io, (int)dc->dc_level);
