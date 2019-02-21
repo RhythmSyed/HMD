@@ -9,3 +9,5 @@ void blink_task(void *pvParameter);
 
 void MPU_task(void *pvParameter);
 void e_paper_task(void *pvParameter);
+
+void bleServer_task(void *pvParameters);
