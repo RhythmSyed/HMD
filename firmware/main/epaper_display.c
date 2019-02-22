@@ -12,7 +12,7 @@
 #include <string.h>
 #include "esp_log.h"
 
-#include "imagedata.h"
+#include "features.h"
 #include "epaper-29-ws.h"
 #include "epaper_fonts.h"
 

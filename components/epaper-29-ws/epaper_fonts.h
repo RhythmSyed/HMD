@@ -12,7 +12,25 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-extern const unsigned char IMAGE_DATA[];
 
-/* FILE END */
+#ifndef _IOT_EPAPER_FONTS_H_
+#define _IOT_EPAPER_FONTS_H_
+
+#ifdef __cplusplus
+extern "C"
+{
+#endif
+#include <stdint.h>
+#include "epaper-29-ws.h"
+
+extern epaper_font_t epaper_font_24;
+extern epaper_font_t epaper_font_20;
+extern epaper_font_t epaper_font_16;
+extern epaper_font_t epaper_font_12;
+extern epaper_font_t epaper_font_8;
+
+#ifdef __cplusplus
+}
+#endif
+#endif
 
