@@ -1,18 +1,53 @@
 #include "freertos/FreeRTOS.h"
 #include "freertos/timers.h"
 
+/*** E-Paper ***/
+    // Image Array
+    extern const unsigned char IMAGE_DATA[];
+    // Tasks
+    void e_paper_task(void *pvParameter);
+    // Functions    
+    void Epaper_display();
+/***************/
 
-extern const unsigned char IMAGE_DATA[];
+
+/*** Heart Rate Sensor ***/
+    // Tasks
+    void getBPM_task(void *pvParameter);
+    // BPM Callback
+    void BPMTimerCallback( TimerHandle_t xTimer );
+    // Functions
+    void heartRate_ADC_init();
+    TimerHandle_t heartRate_timer_init();
+    uint32_t heartRate_collect_data(int down_count, int up_count, int hrt_bt_adc_val, uint32_t expiredCount, uint8_t bufferWriteIndex, TimerHandle_t bpm_timer);
+/*************************/
 
 
-void getBPM_task(void *pvParameter);
-void BPMTimerCallback( TimerHandle_t xTimer );
+/*** BLE ***/
+    // Tasks
+    void bleAdvt_task(void *pvParameters);          // Advertisement Test
+    void bleServer_task(void *pvParameters);        // GATT Server
+/***********/
 
-void bleAdvt_task(void *pvParameters);
 
-void blink_task(void *pvParameter);
+/*** Blink ***/
+    // Tasks
+    void blink_task(void *pvParameter);
+/*************/
 
-void MPU_task(void *pvParameter);
-void e_paper_task(void *pvParameter);
 
-void bleServer_task(void *pvParameters);
+/*** MPU ***/
+    // Tasks
+    void MPU_task(void *pvParameter);
+    // Functions
+    void MPU_init();
+    double MPU_collect_data();
+/***********/
+
+
+/*** Mode ***/
+    // Tasks
+    void ActivityMode_task(void *pvParameters);
+    void SleepMode_task(void *pvParameters);
+/************/
+

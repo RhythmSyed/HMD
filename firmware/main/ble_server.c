@@ -30,7 +30,7 @@
 
 #define GATTS_TAG "GATTS"
 
-#define LED_PIN GPIO_NUM_22
+#define LED_PIN GPIO_NUM_12
 #define HIGH 1
 #define LOW 0
 

@@ -56,7 +56,10 @@ void BLE_init() {
 
 void app_main() {
 
+    // initializations
     BLE_init();
+    MPU_init();
+    heartRate_ADC_init();
 
     // msg received callbacks
     esp_ble_gatts_register_callback(gatts_event_handler);
@@ -65,11 +68,12 @@ void app_main() {
 
 
     // Main tasks
-    //xTaskCreatePinnedToCore(&bleAdvt_task, "bleAdvt_task", 2048, NULL, 5, NULL, 0);
     xTaskCreate(&getBPM_task, "getBPM_task", 4096, NULL, 5, NULL);
-    xTaskCreate(&blink_task, "blink_task", configMINIMAL_STACK_SIZE, NULL, 5, NULL);
+    //xTaskCreate(&blink_task, "blink_task", configMINIMAL_STACK_SIZE, NULL, 5, NULL);
+    //xTaskCreate(&MPU_task, "MPU_task", 4096, NULL, 5, NULL);
     //xTaskCreate(&e_paper_task, "epaper_task", 4 * 1024, NULL, 5, NULL);
 
-    //xTaskCreatePinnedToCore(&bleServer_task, "bleServer_task", 4096, NULL, 5, NULL, 0);
+    xTaskCreate(&ActivityMode_task, "SleepMode_task", 4096, NULL, 5, NULL);
+    //xTaskCreate(&SleepMode_task, "SleepMode_task", 4096, NULL, 5, NULL);
 
 }
