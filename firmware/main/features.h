@@ -19,7 +19,7 @@
     // Functions
     void heartRate_ADC_init();
     TimerHandle_t heartRate_timer_init();
-    uint32_t heartRate_collect_data(int down_count, int up_count, int hrt_bt_adc_val, uint32_t expiredCount, uint8_t bufferWriteIndex, TimerHandle_t bpm_timer);
+    uint32_t heartRate_collect_data(int *down_count, int *up_count, uint32_t *expiredCountBuffer, uint8_t *bufferWriteIndex, TimerHandle_t *bpm_timer);
 /*************************/
 
 

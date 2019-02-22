@@ -17,7 +17,9 @@
 #include "sdkconfig.h"
 #include "ble_server.h"
 #include "features.h"
+#include "driver/gpio.h"
 #define GATTS_TAG "HMD_MAIN"
+
 
 
 void BLE_init() {
@@ -60,20 +62,28 @@ void app_main() {
     BLE_init();
     MPU_init();
     heartRate_ADC_init();
+    gpio_pad_select_gpio(GPIO_NUM_14);
+    gpio_set_direction(GPIO_NUM_14, GPIO_MODE_OUTPUT);
 
     // msg received callbacks
     esp_ble_gatts_register_callback(gatts_event_handler);
     esp_ble_gap_register_callback(gap_event_handler);
     esp_ble_gatts_app_register(BLE_PROFILE_APP_ID);
 
+    // if (gpio_get_level(GPIO_NUM_14)) {
+    //     xTaskCreate(&ActivityMode_task, "SleepMode_task", 4096, NULL, 5, NULL);
+    //} else {
+    //     xTaskCreate(&SleepMode_task, "SleepMode_task", 4096, NULL, 5, NULL);
+    // }
+
 
     // Main tasks
-    xTaskCreate(&getBPM_task, "getBPM_task", 4096, NULL, 5, NULL);
+    //xTaskCreate(&getBPM_task, "getBPM_task", 4096, NULL, 5, NULL);
     //xTaskCreate(&blink_task, "blink_task", configMINIMAL_STACK_SIZE, NULL, 5, NULL);
     //xTaskCreate(&MPU_task, "MPU_task", 4096, NULL, 5, NULL);
     //xTaskCreate(&e_paper_task, "epaper_task", 4 * 1024, NULL, 5, NULL);
 
-    xTaskCreate(&ActivityMode_task, "SleepMode_task", 4096, NULL, 5, NULL);
+    //xTaskCreate(&ActivityMode_task, "SleepMode_task", 4096, NULL, 5, NULL);
     //xTaskCreate(&SleepMode_task, "SleepMode_task", 4096, NULL, 5, NULL);
 
 }

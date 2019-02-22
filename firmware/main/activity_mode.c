@@ -22,14 +22,13 @@ void ActivityMode_task(void *pvParameters) {
         }
 
         // display current step count
-        Epaper_display(step_count, 1);
+        Epaper_display(step_count, 1);                      // 1 for activity mode
         
         //send to app
         // if switch to sleep, vtaskSuspend
     
 
         // BLE_send();
-        // display_epaper();
 
         vTaskDelay(100/portTICK_PERIOD_MS);
     }

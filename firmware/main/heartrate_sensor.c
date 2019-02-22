@@ -46,10 +46,10 @@ TimerHandle_t heartRate_timer_init() {
 }
 
 
-uint32_t heartRate_collect_data(int down_count, int up_count, int hrt_bt_adc_val, uint32_t expiredCount, uint8_t bufferWriteIndex, TimerHandle_t bpm_timer) {
-    uint32_t expiredCountBuffer[ BUFFER_LENGTH ];
+uint32_t heartRate_collect_data(int *down_count, int *up_count, uint32_t *expiredCountBuffer, uint8_t *bufferWriteIndex, TimerHandle_t *bpm_timer) {
     uint32_t bpm = 0;
-
+    int hrt_bt_adc_val = 0;    
+    uint32_t expiredCount = 0;
     
     /* fixes watchdog timer issue */
     TIMERG0.wdt_wprotect=TIMG_WDT_WKEY_VALUE;
@@ -58,43 +58,51 @@ uint32_t heartRate_collect_data(int down_count, int up_count, int hrt_bt_adc_val
 
     /* The value from the adc for Heart Beat sensor */
     hrt_bt_adc_val = adc1_get_raw(ADC1_CHANNEL_0);
+    // printf("down_count: %d\n", *down_count);
+    // printf("up_count: %d\n", *up_count);
+    // printf("hrt_bt_adc_val: %d\n", hrt_bt_adc_val);
 
     /* Thresholds to calculate the if there was a heart beat or not */
     if( hrt_bt_adc_val < 1683){
-        down_count++;
+        *down_count = *down_count + 1;
     }
-    if(down_count > 10 && hrt_bt_adc_val > 1882){
-        up_count++;
+    if(*down_count > 10 && hrt_bt_adc_val > 1882){
+        *up_count = *up_count + 1;
     }
-    if( up_count > 20 && hrt_bt_adc_val < 1753){
+    if( *up_count > 20 && hrt_bt_adc_val < 1753){
         
-        down_count = 0;
-        up_count = 0;
+        *down_count = 0;
+        *up_count = 0;
         
         /* The number of times this timer has expired is saved as the timer's ID. Obtain the count. */
-        expiredCount = ( uint32_t ) pvTimerGetTimerID(bpm_timer);
+        expiredCount = ( uint32_t ) pvTimerGetTimerID(*bpm_timer);
         /* Write new expiredCount to buffer */
-        expiredCountBuffer[ bufferWriteIndex ] = expiredCount;
-        bufferWriteIndex ++;
-        if (bufferWriteIndex == BUFFER_LENGTH){
-            bufferWriteIndex = 0;
+        expiredCountBuffer[ *bufferWriteIndex ] = expiredCount;
+        *bufferWriteIndex = *bufferWriteIndex + 1;
+        if (*bufferWriteIndex == BUFFER_LENGTH){
+            *bufferWriteIndex = 0;
         }
+
         /* Average expire count in buffer */
-        for(uint8_t index = 0; index <BUFFER_LENGTH;index ++){
+        for(uint8_t index = 0; index <BUFFER_LENGTH; index++){
             expiredCount += expiredCountBuffer[ index ];
         }
         expiredCount = expiredCount / BUFFER_LENGTH;
+        
         /* Expires every 1/100 of a second. Calc BPM*/
         bpm =  (100 * 60 * 1) / expiredCount;
+
         //configPRINTF( ( "BEAT! ADC Val: %d  BPM: %d \r\n", hrt_bt_adc_val, bpm ) );
         //printf("BEAT! ADC Val: %d  BPM: %d \r\n", hrt_bt_adc_val, bpm);
-        printf("BEAT! ADC Val: %d  BPM: %d\n", hrt_bt_adc_val, bpm);
+        //printf("BEAT! ADC Val: %d  BPM: %d\n", hrt_bt_adc_val, bpm);
         /* Reset timer */
-        xTimerReset(bpm_timer, 0);
-        vTimerSetTimerID( bpm_timer,0);
+        xTimerReset(*bpm_timer, 0);
+        vTimerSetTimerID(*bpm_timer, 0);
+
+        return bpm;
     }
     
-    return bpm;
+    return NULL;
 }
 
 
@@ -163,7 +171,7 @@ void getBPM_task(void *pvParameter) {
             expiredCount = expiredCount / BUFFER_LENGTH;
             /* Expires every 1/100 of a second. Calc BPM*/
             bpm =  (100 * 60 * 1) / expiredCount;
-            Epaper_display((int) bpm, 0);
+            //Epaper_display((int) bpm, 0);
 
             //configPRINTF( ( "BEAT! ADC Val: %d  BPM: %d \r\n", hrt_bt_adc_val, bpm ) );
             //printf("BEAT! ADC Val: %d  BPM: %d \r\n", hrt_bt_adc_val, bpm);
