@@ -19,14 +19,12 @@
 #include "esp_gatts_api.h"
 #include "esp_bt_defs.h"
 #include "esp_bt_main.h"
-#include "esp_bt_main.h"
 
 #include <driver/rmt.h>
 #include <driver/gpio.h>
 
 #include "sdkconfig.h"
 
-#include "ble_server.h"
 #include "features.h"
 
 #define GATTS_TAG "GATTS"
@@ -35,9 +33,16 @@
 #define HIGH 1
 #define LOW 0
 
+#define GATTS_SERVICE_UUID   0x0001
+//#define GATTS_CHAR_UUID      0xFF01
+//#define GATTS_DESCR_UUID     0x3333
+#define GATTS_CHAR_NUM		2
+#define GATTS_NUM_HANDLE     1+(3*GATTS_CHAR_NUM)
+#define BLE_DEVICE_NAME            "HMD_wearable"
+#define BLE_MANUFACTURER_DATA_LEN  4
+#define GATTS_CHAR_VAL_LEN_MAX		22
+
 static uint8_t led_stat=0;
-
-
 uint8_t char1_str[GATTS_CHAR_VAL_LEN_MAX] = {0x11,0x22,0x33};
 uint8_t char2_str[GATTS_CHAR_VAL_LEN_MAX] = {0x11,0x22,0x33};
 uint8_t descr1_str[GATTS_CHAR_VAL_LEN_MAX] = {0x00,0x00};

@@ -15,10 +15,9 @@
 #include "esp_bt_main.h"
 #include "esp_bt_main.h"
 #include "sdkconfig.h"
-#include "ble_server.h"
 #include "features.h"
 #include "driver/gpio.h"
-#define GATTS_TAG "HMD_MAIN"
+#define TAG "HMD_MAIN"
 
 
 
@@ -28,29 +27,29 @@ void BLE_init() {
 
     ret = esp_bt_controller_mem_release(ESP_BT_MODE_CLASSIC_BT);
     if (ret) {
-        ESP_LOGI(GATTS_TAG, "Bluetooth controller release classic bt memory failed: %s", esp_err_to_name(ret));
+        ESP_LOGI(TAG, "Bluetooth controller release classic bt memory failed: %s", esp_err_to_name(ret));
         return;
     }
 
     ret = esp_bt_controller_init(&bt_cfg);
     if (ret) {
-        ESP_LOGE(GATTS_TAG, "%s initialize controller failed\n", __func__);
+        ESP_LOGE(TAG, "%s initialize controller failed\n", __func__);
         return;
     }
 
     ret = esp_bt_controller_enable(ESP_BT_MODE_BLE);
     if (ret) {
-        ESP_LOGE(GATTS_TAG, "%s enable controller failed\n", __func__);
+        ESP_LOGE(TAG, "%s enable controller failed\n", __func__);
         return;
     }
     ret = esp_bluedroid_init();
     if (ret) {
-        ESP_LOGE(GATTS_TAG, "%s init bluetooth failed\n", __func__);
+        ESP_LOGE(TAG, "%s init bluetooth failed\n", __func__);
         return;
     }
     ret = esp_bluedroid_enable();
     if (ret) {
-        ESP_LOGE(GATTS_TAG, "%s enable bluetooth failed\n", __func__);
+        ESP_LOGE(TAG, "%s enable bluetooth failed\n", __func__);
         return;
     }
 }
@@ -62,8 +61,8 @@ void app_main() {
     BLE_init();
     MPU_init();
     heartRate_ADC_init();
-    gpio_pad_select_gpio(GPIO_NUM_14);
-    gpio_set_direction(GPIO_NUM_14, GPIO_MODE_OUTPUT);
+    // gpio_pad_select_gpio(GPIO_NUM_14);
+    // gpio_set_direction(GPIO_NUM_14, GPIO_MODE_OUTPUT);
 
     // msg received callbacks
     esp_ble_gatts_register_callback(gatts_event_handler);

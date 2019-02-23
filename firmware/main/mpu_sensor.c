@@ -1,3 +1,7 @@
+/* 
+	Example Attribution: https://github.com/nkolban/esp32-snippets MPU6050 Example Usage
+ */
+
 #include <freertos/FreeRTOS.h>
 #include <driver/i2c.h>
 #include <esp_log.h>
