@@ -32,14 +32,18 @@
 
 static const char* TAG = "ePaper Driver";
 
-#define EPAPER_QUE_SIZE_DEFAULT 10
+
 
 const unsigned char lut_full_update[] =
 {
+   0x50, 0xAA, 0x55, 0xAA, 0x11, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+  0x00, 0x00, 0x00, 0x00, 0x00, 0xFF, 0xFF, 0x1F, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00
+    /*
     0x02, 0x02, 0x01, 0x11, 0x12, 0x12, 0x22, 0x22,
     0x66, 0x69, 0x69, 0x59, 0x58, 0x99, 0x99, 0x88,
     0x00, 0x00, 0x00, 0x00, 0xF8, 0xB4, 0x13, 0x51,
     0x35, 0x51, 0x51, 0x19, 0x01, 0x00
+    */
 };
 
 // This LUT is not yet used in the code below
@@ -72,7 +76,7 @@ typedef struct {
 /* This function is called (in irq context!) just before a transmission starts.
  * It will set the D/C line to the value indicated in the user field
  */
-static void iot_epaper_pre_transfer_callback(spi_transaction_t *t)
+void iot_epaper_pre_transfer_callback(spi_transaction_t *t)
 {
     epaper_dc_t *dc = (epaper_dc_t *) t->user;
     gpio_set_level((int)dc->dc_io, (int)dc->dc_level);
@@ -150,6 +154,7 @@ static void iot_epaper_gpio_init(epaper_conf_t * pin)
     gpio_set_pull_mode(pin->busy_pin, GPIO_PULLUP_ONLY);
 }
 
+//Depricated, moved into esp-epaper-29-ws.c
 static esp_err_t iot_epaper_spi_init(epaper_handle_t dev, spi_device_handle_t *e_spi, epaper_conf_t *pin)
 {
     esp_err_t ret;
@@ -236,7 +241,7 @@ epaper_handle_t iot_epaper_create(spi_device_handle_t bus, epaper_conf_t *epconf
         ESP_LOGE(TAG, "frame_buffer malloc fail");
         return NULL;
     }
-    iot_epaper_gpio_init(epconf);
+    //iot_epaper_gpio_init(epconf);
     ESP_LOGD(TAG, "gpio init ok");
     if (bus) {
         dev->bus = bus;

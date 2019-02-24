@@ -1,8 +1,11 @@
 import React, { Component } from 'react';
-import { Platform, View, Text } from 'react-native';
+import { Platform, View, Text, StyleSheet, Button, Alert } from 'react-native';
 import { BleManager } from 'react-native-ble-plx'
 
-//const manager = new BleManager()
+
+curr_device = ''
+NordicserviceUUID = "6e400001-b5a3-f393-e0a9-e50e24dcca9e"
+RXcharacteristic = "6e400002-b5a3-f393-e0a9-e50e24dcca9e"
 
 export default class SensorsComponent extends Component {
 
@@ -10,13 +13,14 @@ export default class SensorsComponent extends Component {
       super()
       this.manager = new BleManager()
       this.state = {info: "", values: {}}
-      this.prefixUUID = "6E400001"
-      this.suffixUUID = "-B5A3-F393-E0A9-E50E24DCCA9E"
+      this.prefixUUID = "6e400001"
+      this.suffixUUID = "-b5a3-f393-e0a9-e50e24dcca9e"
       this.sensors = {
-        1: "Heartrate",
-        2: "Accelerometer",
-        3: "Gyroscope",
+        1: "Heartrate"
       }
+      this.NordicserviceUUID = "6e400001-b5a3-f393-e0a9-e50e24dcca9e"
+      this.RXcharacteristic = "6e400002-b5a3-f393-e0a9-e50e24dcca9e"
+
     }
   
     serviceUUID(num) {
@@ -44,77 +48,94 @@ export default class SensorsComponent extends Component {
     }
 
     componentWillMount() {
-    if (Platform.OS === 'ios') {
-        this.manager.onStateChange((state) => {
-        if (state === 'PoweredOn') this.scanAndConnect()
-        })
-    } else {
-        this.scanAndConnect()
-    }
+      if (Platform.OS === 'ios') {
+          this.manager.onStateChange((state) => {
+          if (state === 'PoweredOn') this.scanAndConnect()
+          })
+      } else {
+          this.scanAndConnect()
+      }
     }
 
     scanAndConnect() {
-    this.manager.startDeviceScan(null,
-                                    null, (error, device) => {
-        this.info("Scanning...")
-        console.log(device)
-
+      this.manager.startDeviceScan(null, null, (error, device) => {
+        this.info("Scanning...");
+        console.log(device);
+  
         if (error) {
-        this.error(error.message)
-        return
+          this.error(error.message);
+          return
         }
+  
+        if (device.name ==='HMD_wearable') {
+        this.info("Connecting to HMD");
+        this.manager.stopDeviceScan();
 
-        if (device.name === 'HMD_wearable') {
-        this.info("Connecting to HMD")
-        this.manager.stopDeviceScan()
         device.connect()
-            // .then((device) => {
-            // this.info("Discovering services and characteristics")
-            // return device.discoverAllServicesAndCharacteristics()
-            // })
-            // .then((device) => {
-            // this.info("Setting notifications")
-            // return this.setupNotifications(device)
-            // })
-            .then(() => {
-            this.info("Listening...")
-            }, (error) => {
+          .then((device) => {
+            this.info("Discovering services and characteristics");
+            return device.discoverAllServicesAndCharacteristics()
+          })
+          .then((device) => {
+            this.info('READY');
+            curr_device = device
+
+          // device.writeCharacteristicWithResponseForService(this.NordicserviceUUID, this.RXcharacteristic, 'TEVEIE9O')
+          //   .then((characteristic) => {
+          //     this.info(characteristic.value);
+          //     return 
+          //   })
+
+          })
+          .catch((error) => {
             this.error(error.message)
-            })
+          })
         }
-    });
+
+     });
     }
 
-    async setupNotifications(device) {
-    for (const id in this.sensors) {
-        const service = this.serviceUUID(id)
-        const characteristicW = this.writeUUID(id)
-        const characteristicN = this.notifyUUID(id)
 
-        const characteristic = await device.writeCharacteristicWithResponseForService(
-        service, characteristicW, "AQ==" /* 0x01 in hex */
-        )
-
-        device.monitorCharacteristicForService(service, characteristicN, (error, characteristic) => {
-        if (error) {
-            this.error(error.message)
-            return
-        }
-        this.updateValue(characteristic.uuid, characteristic.value)
-        })
-    }
-    }
 
     render() {
     return (
         <View>
-        <Text>{this.state.info}</Text>
-        {Object.keys(this.sensors).map((key) => {
-            return <Text key={key}>
-                    {this.sensors[key] + ": " + (this.state.values[this.notifyUUID(key)] || "-")}
-                    </Text>
-        })}
+          
+          <Text>{this.state.info}</Text>
+          {Object.keys(this.sensors).map((key) => {
+              return <Text key={key}>
+                      {this.sensors[key] + ": " + (this.state.values[this.notifyUUID(key)] || "-")}
+                      </Text>
+          })}
+
+          <View style={styles.button}>
+            <Button title="LED ON" onPress={()=> {
+              curr_device.writeCharacteristicWithResponseForService(NordicserviceUUID, RXcharacteristic, 'TEVEIE9O')
+            }}/>
+          </View>
+
+          <View style={styles.button}>
+            <Button title="LED OFF" onPress={()=> {
+              curr_device.writeCharacteristicWithResponseForService(NordicserviceUUID, RXcharacteristic, 'TEVEIE9GRg==')
+            }}/>
+          </View>
+
+          <View style={styles.button}>
+            <Button title="ACTIVITY MODE" onPress={()=> {
+              curr_device.writeCharacteristicWithResponseForService(NordicserviceUUID, RXcharacteristic, 'QUNUSVZJVFk=')
+            }}/>
+          </View>
+
+
         </View>
+        
     )
     }
 }
+
+
+const styles = StyleSheet.create({
+  button: {
+    marginTop: 10
+  }
+});

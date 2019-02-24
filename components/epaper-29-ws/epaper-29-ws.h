@@ -39,9 +39,13 @@ typedef struct
 #define COLORED         0
 #define UNCOLORED       1
 
+#define EPAPER_QUE_SIZE_DEFAULT 10
+
 // Display resolution
 #define EPD_WIDTH       200
 #define EPD_HEIGHT      200
+
+void iot_epaper_pre_transfer_callback(spi_transaction_t *t);
 
 // Display CONTROLLER COMMANDS
 #define E_PAPER_DRIVER_OUTPUT_CONTROL                       0x01

@@ -11,9 +11,9 @@ void blink_task(void *pvParameter)
 
     while(1) {
         gpio_set_level(GPIO_NUM_5, 0);
-        vTaskDelay(1000 / portTICK_PERIOD_MS);
+        vTaskDelay(200 / portTICK_PERIOD_MS);
         gpio_set_level(GPIO_NUM_5, 1);
-        vTaskDelay(1000 / portTICK_PERIOD_MS);
+        vTaskDelay(200 / portTICK_PERIOD_MS);
     }
 
 }
