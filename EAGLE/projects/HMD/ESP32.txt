@@ -1,0 +1,12 @@
+Partlist exported from /Users/sam/Documents/EAGLE/projects/HMD/ESP32.sch at 2/20/19 1:23 PM
+
+Part Value       Device                    Package  Description                                                                                                      PROD_ID   VALUE
+-C1   10uF        10UF-0603-6.3V-20%        0603     10.0µF ceramic capacitors                                                                                        CAP-11015 10uF 
+-C2   0.1uF       0.1UF-0603-25V-(+80/-20%) 0603     0.1µF ceramic capacitors                                                                                         CAP-00810 0.1uF
+-C3   0.1uF       0.1UF-0603-25V-(+80/-20%) 0603     0.1µF ceramic capacitors                                                                                         CAP-00810 0.1uF
+DTR*             CONN_01                   1X01     Single connection point. Often used as Generic Header-pin footprint for 0.1 inch spaced/style header connections                
+-R5    10k        RESISTOR0603              0603     Generic Resistor Package                                                                                                        
+RTS*             CONN_01                   1X01     Single connection point. Often used as Generic Header-pin footprint for 0.1 inch spaced/style header connections                
+RX               CONN_01                   1X01     Single connection point. Often used as Generic Header-pin footprint for 0.1 inch spaced/style header connections                
+TX               CONN_01                   1X01     Single connection point. Often used as Generic Header-pin footprint for 0.1 inch spaced/style header connections                
+-U$1  ESP32_WROOM ESP32_WROOM               ESP32_FP                                                                                                                                 

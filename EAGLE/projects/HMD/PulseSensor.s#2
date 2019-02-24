@@ -801,8 +801,10 @@ general purpose rectifier, 1 A</description>
 </package>
 <package name="REVMNT_LED_FP">
 <hole x="0" y="0" drill="2.25"/>
-<smd name="P$1" x="2.975" y="0" dx="1.5" dy="1" layer="1"/>
-<smd name="P$2" x="-2.975" y="0" dx="1.5" dy="1" layer="1"/>
+<smd name="P$1" x="2.525" y="0" dx="1.5" dy="1" layer="1"/>
+<smd name="P$2" x="-2.525" y="0" dx="1.5" dy="1" layer="1"/>
+<text x="-3" y="1" size="0.5" layer="25">&gt;NAME</text>
+<text x="0.5" y="-1.5" size="0.5" layer="27">&gt;VALUE</text>
 </package>
 </packages>
 <symbols>

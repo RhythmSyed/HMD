@@ -801,8 +801,8 @@ general purpose rectifier, 1 A</description>
 </package>
 <package name="REVMNT_LED_FP">
 <hole x="0" y="0" drill="2.25"/>
-<smd name="P$1" x="2.575" y="0" dx="1.5" dy="1" layer="1"/>
-<smd name="P$2" x="-2.575" y="0" dx="1.5" dy="1" layer="1"/>
+<smd name="P$1" x="2.525" y="0" dx="1.5" dy="1" layer="1"/>
+<smd name="P$2" x="-2.525" y="0" dx="1.5" dy="1" layer="1"/>
 </package>
 </packages>
 <symbols>
@@ -1080,7 +1080,7 @@ You are welcome to use this library for commercial purposes. For attribution, we
 <instance part="SUPPLY1" gate="G$1" x="233.68" y="154.94" smashed="yes">
 <attribute name="VALUE" x="233.68" y="157.734" size="1.778" layer="96" align="bottom-center"/>
 </instance>
-<instance part="U$2" gate="G$1" x="44.958" y="113.284" smashed="yes"/>
+<instance part="U$2" gate="G$1" x="44.958" y="113.538" smashed="yes"/>
 </instances>
 <busses>
 </busses>
@@ -1186,6 +1186,7 @@ You are welcome to use this library for commercial purposes. For attribution, we
 <label x="223.52" y="150.876" size="1.778" layer="95"/>
 <wire x1="233.68" y1="154.94" x2="233.68" y2="149.86" width="0.1524" layer="91"/>
 <pinref part="SUPPLY1" gate="G$1" pin="3.3V"/>
+<pinref part="U$2" gate="G$1" pin="A"/>
 </segment>
 </net>
 <net name="N$12" class="0">
@@ -1217,10 +1218,8 @@ You are welcome to use this library for commercial purposes. For attribution, we
 <net name="N$6" class="0">
 <segment>
 <pinref part="R1" gate="G$1" pin="2"/>
-<wire x1="44.958" y1="95.758" x2="44.958" y2="110.744" width="0.1524" layer="91"/>
+<wire x1="44.958" y1="95.758" x2="44.958" y2="110.998" width="0.1524" layer="91"/>
 <pinref part="U$2" gate="G$1" pin="C"/>
-<wire x1="44.958" y1="110.744" x2="44.958" y2="110.998" width="0.1524" layer="91"/>
-<junction x="44.958" y="110.744"/>
 </segment>
 </net>
 <net name="HR_OUT" class="0">
