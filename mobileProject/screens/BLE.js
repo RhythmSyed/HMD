@@ -19,7 +19,10 @@ export default class SensorsComponent extends Component {
       this.manager = new BleManager()
       
       this.state = {
-        info: "", values: {},
+        info: "", values: {}
+      }
+
+      this.sensorData = {
         HeartRate: "",
         Accelerometer: "",
         Gyroscope: ""
@@ -110,13 +113,6 @@ export default class SensorsComponent extends Component {
           //         return
           //       })
           //   })
-            
-          device.readCharacteristicForService(this.NordicserviceUUID, this.TXcharacteristic)
-          .then((characteristic) => {
-            this.info('BPM RECEIVED');
-            current_heartRateValue = this.dataReceiver(characteristic.value)
-            this.setState(this.state)
-          })
         
         })
           .catch((error) => {
@@ -135,12 +131,10 @@ export default class SensorsComponent extends Component {
           
           <Text>{this.state.info}</Text>
 
-          {Object.keys(this.state).map((key) => {
-            if (key == 'HeartRate') {
+          {Object.keys(this.sensorData).map((key) => {
               return <Text>
-                        {this.state[key] + ": " + heartRateValue }
+                        {key + ": " + this.sensorData[key] }
                      </Text>
-            }
           })}
 
           <View style={styles.button}>
@@ -165,11 +159,17 @@ export default class SensorsComponent extends Component {
             <Button title="READ HEARTRATE " onPress={()=> {
               curr_device.readCharacteristicForService(this.NordicserviceUUID, this.TXcharacteristic)
               .then((characteristic) => {
-                this.info('BPM RECEIVED');
+                this.info('DATA RECEIVED');
                 incoming_data = this.dataReceiver(characteristic.value)
-                 if (incoming_data[-1] == 'H') {
-                    heartRateValue = incoming_data.split('H')[0]
-                 }
+                
+                if (incoming_data[-1] == 'H') {
+                  this.sensorData.HeartRate = incoming_data
+                } else if (incoming_data[-1] == 'A') {
+                  this.sensorData.Accelerometer = incoming_data
+                } else if (incoming_data[-1] == 'G') {
+                  this.sensorData.Gyroscope = incoming_data
+                }
+
                 this.setState(this.state)
                 return
               })
