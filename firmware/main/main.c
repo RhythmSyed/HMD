@@ -57,6 +57,13 @@ void BLE_init() {
 
 void app_main() {
 
+    esp_err_t ret = nvs_flash_init();
+	if (ret == ESP_ERR_NVS_NO_FREE_PAGES || ret == ESP_ERR_NVS_NEW_VERSION_FOUND) {
+		ESP_ERROR_CHECK(nvs_flash_erase());
+		ret = nvs_flash_init();
+	}
+	ESP_ERROR_CHECK( ret );
+
     // initializations
     BLE_init();
     MPU_init();
@@ -83,6 +90,6 @@ void app_main() {
     //xTaskCreate(&e_paper_task, "epaper_task", 4 * 1024, NULL, 5, NULL);
 
     //xTaskCreate(&ActivityMode_task, "SleepMode_task", 4096, NULL, 5, NULL);
-    //xTaskCreate(&SleepMode_task, "SleepMode_task", 4096, NULL, 5, NULL);
+    xTaskCreate(&SleepMode_task, "SleepMode_task", 4096, NULL, 5, NULL);
 
 }

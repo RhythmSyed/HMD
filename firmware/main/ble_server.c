@@ -44,9 +44,9 @@
 
 static uint8_t led_stat=0;
 uint8_t char1_str[GATTS_CHAR_VAL_LEN_MAX] = {0x11,0x22,0x33};
-uint8_t char2_str[GATTS_CHAR_VAL_LEN_MAX] = {0x11,0x22,0x33};
-uint8_t descr1_str[GATTS_CHAR_VAL_LEN_MAX] = {0x00,0x00};
-uint8_t descr2_str[GATTS_CHAR_VAL_LEN_MAX] = "Hallo ESP32";
+uint8_t char2_str[GATTS_CHAR_VAL_LEN_MAX] = "bad";
+uint8_t descr1_str[GATTS_CHAR_VAL_LEN_MAX] = {0x11,0x11};
+uint8_t descr2_str[GATTS_CHAR_VAL_LEN_MAX] = "HeartRateData";
 
 esp_attr_value_t gatts_demo_char1_val = {
 	.attr_max_len = GATTS_CHAR_VAL_LEN_MAX,
@@ -192,16 +192,24 @@ static struct gatts_char_inst gl_char[GATTS_CHAR_NUM] = {
 		}
 };
 
+void send_BLE(uint32_t *BPM) {
+	char str[GATTS_CHAR_VAL_LEN_MAX];
+	sprintf(str, "%uH", *BPM );
+	memcpy(char2_str, &str, sizeof(uint32_t) + 1);
+}
+
 void char1_read_handler(esp_gatts_cb_event_t event, esp_gatt_if_t gatts_if, esp_ble_gatts_cb_param_t *param) {
 	ESP_LOGI(GATTS_TAG, "char1_read_handler %d\n", param->read.handle);
 
 	esp_gatt_rsp_t rsp;
 	memset(&rsp, 0, sizeof(esp_gatt_rsp_t));
 	rsp.attr_value.handle = param->read.handle;
+
 	if (gl_char[0].char_val!=NULL) {
 		ESP_LOGI(GATTS_TAG, "char1_read_handler char_val %d\n",gl_char[0].char_val->attr_len);
 		rsp.attr_value.len = gl_char[0].char_val->attr_len;
 		for (uint32_t pos=0;pos<gl_char[0].char_val->attr_len&&pos<gl_char[0].char_val->attr_max_len;pos++) {
+			printf("gl_char: %c\n", gl_char[0].char_val->attr_value[pos]);
 			rsp.attr_value.value[pos] = gl_char[0].char_val->attr_value[pos];
 		}
 	}
@@ -212,7 +220,7 @@ void char1_read_handler(esp_gatts_cb_event_t event, esp_gatt_if_t gatts_if, esp_
 
 void char2_read_handler(esp_gatts_cb_event_t event, esp_gatt_if_t gatts_if, esp_ble_gatts_cb_param_t *param) {
 	ESP_LOGI(GATTS_TAG, "char2_read_handler %d\n", param->read.handle);
-
+	
 	esp_gatt_rsp_t rsp;
 	memset(&rsp, 0, sizeof(esp_gatt_rsp_t));
 	rsp.attr_value.handle = param->read.handle;
@@ -307,11 +315,11 @@ void char1_write_handler(esp_gatts_cb_event_t event, esp_gatt_if_t gatts_if, esp
     	led_stat=1-led_stat;
     	gpio_set_level(LED_PIN,led_stat);
     } else if (strncmp((const char *)gl_char[0].char_val->attr_value,"ACTIVITY", 8)==0) {
-		vTaskSuspend(&SleepMode_task);
-		xTaskCreate(&ActivityMode_task, "SleepMode_task", 4096, NULL, 5, NULL);
+		//vTaskSuspend(&SleepMode_task);
+		//xTaskCreate(&ActivityMode_task, "SleepMode_task", 4096, NULL, 5, NULL);
 	} else if (strncmp((const char *)gl_char[0].char_val->attr_value,"SLEEP", 5)==0) {
-		vTaskSuspend(&ActivityMode_task);
-		xTaskCreate(&SleepMode_task, "SleepMode_task", 4096, NULL, 5, NULL);
+		//vTaskSuspend(&ActivityMode_task);
+		//xTaskCreate(&SleepMode_task, "SleepMode_task", 4096, NULL, 5, NULL);
 	}
 	else {
     	char2_notify_handle(gatts_if, param->write.conn_id);

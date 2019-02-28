@@ -102,7 +102,7 @@ uint32_t heartRate_collect_data(int *down_count, int *up_count, uint32_t *expire
         return bpm;
     }
     
-    return NULL;
+    return -1;
 }
 
 
