@@ -19,7 +19,7 @@ void SleepMode_task(void *pvParameters) {
         BPM = heartRate_collect_data(&down_count, &up_count, expiredCountBuffer, &bufferWriteIndex, &bpm_timer);
        
         if (BPM != -1) {
-            send_BLE(&BPM);
+            send_BLE(&BPM, 'H');                    // H for heart rate
             Epaper_display((int) BPM, 0);           // 0 for sleep mode
         }
         

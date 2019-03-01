@@ -9,6 +9,7 @@
 #include <math.h>
 
 #include "sdkconfig.h"
+#include "features.h"
 
 #define PIN_SDA 16
 #define PIN_CLK 17
@@ -73,7 +74,7 @@ void MPU_init() {
 }
 
 
-double MPU_collect_data() {
+void MPU_collect_data(struct motionTracker *MPU_data) {
 	i2c_cmd_handle_t cmd;
 
 	uint8_t data[14];
@@ -92,8 +93,8 @@ double MPU_collect_data() {
     double gyro_y;
     double gyro_z;
 
-	double accel_mag;
-	double gyro_mag;
+	// double accel_mag;
+	// double gyro_mag;
 
 
 	cmd = i2c_cmd_link_create();
@@ -145,10 +146,16 @@ double MPU_collect_data() {
 	// printf("accel: %lf %lf %lf \t", accel_x, accel_y, accel_z);
 	// printf("gyro:  %lf %lf %lf \n", gyro_x, gyro_y, gyro_z);
 
-	accel_mag = sqrt(accel_x*accel_x + accel_y*accel_y + accel_z*accel_z);
-	gyro_mag = sqrt(gyro_x*gyro_x + gyro_y*gyro_y + gyro_z*gyro_z);
+	MPU_data->accel_x = accel_x;
+	MPU_data->accel_y = accel_y;
+	MPU_data->accel_z = accel_z;
+	MPU_data->gyro_x = gyro_x;
+	MPU_data->gyro_y = gyro_y;
+	MPU_data->gyro_z = gyro_z;
+
+	// accel_mag = sqrt(accel_x*accel_x + accel_y*accel_y + accel_z*accel_z);
+	// gyro_mag = sqrt(gyro_x*gyro_x + gyro_y*gyro_y + gyro_z*gyro_z);
 	
-	return gyro_mag;
-	
+	return;
 	
 }

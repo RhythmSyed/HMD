@@ -161,12 +161,14 @@ export default class SensorsComponent extends Component {
               .then((characteristic) => {
                 this.info('DATA RECEIVED');
                 incoming_data = this.dataReceiver(characteristic.value)
+                console.log('incoming_data: ' + incoming_data)
                 
-                if (incoming_data[-1] == 'H') {
+
+                if (incoming_data.indexOf('H') > -1) {
                   this.sensorData.HeartRate = incoming_data
-                } else if (incoming_data[-1] == 'A') {
+                } else if (incoming_data.indexOf('A') > -1) {
                   this.sensorData.Accelerometer = incoming_data
-                } else if (incoming_data[-1] == 'G') {
+                } else if (incoming_data.indexOf('G') > -1) {
                   this.sensorData.Gyroscope = incoming_data
                 }
 
