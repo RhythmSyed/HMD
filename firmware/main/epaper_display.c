@@ -53,9 +53,9 @@ static void epaper_gpio_init(epaper_conf_t * pin)
 void Epaper_display(int mode_data, int mode) {
     char data[25];
     memset(data, 0x00, sizeof(data));
-    if (mode == 0) {
+    if (mode == SLEEP_MODE) {
         sprintf(data, "%4d BPM", (uint8_t) mode_data);
-    } else if (mode == 1) {
+    } else if (mode == ACTIVITY_MODE) {
         sprintf(data, "%4d steps", (uint8_t) mode_data);
     }
     

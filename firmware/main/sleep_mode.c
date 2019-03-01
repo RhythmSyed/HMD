@@ -1,6 +1,7 @@
 #include <freertos/FreeRTOS.h>
 #include <freertos/task.h>
 #include "features.h"
+#include "driver/gpio.h"
 #define BUFFER_LENGTH 10
 
 
@@ -13,6 +14,8 @@ void SleepMode_task(void *pvParameters) {
     uint8_t bufferWriteIndex = 0;
     TimerHandle_t bpm_timer = heartRate_timer_init();
     uint32_t BPM = 0;
+    gpio_pad_select_gpio(GPIO_NUM_26);
+    gpio_set_direction(GPIO_NUM_26, GPIO_MODE_OUTPUT);
 
     while(1) {
 
@@ -20,7 +23,7 @@ void SleepMode_task(void *pvParameters) {
        
         if (BPM != -1) {
             send_BLE(&BPM, 'H');                    // H for heart rate
-            Epaper_display((int) BPM, 0);           // 0 for sleep mode
+            Epaper_display((int) BPM, SLEEP_MODE);           // 0 for sleep mode
         }
         
 

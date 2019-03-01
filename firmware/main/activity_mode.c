@@ -31,7 +31,7 @@ void ActivityMode_task(void *pvParameters) {
 
         if (gyro_mag > upper_threshold) {
             send_BLE(&gyro_mag, 'G');                       // G for gyro
-            Epaper_display(step_count, 1);                  // 1 for activity
+            Epaper_display(step_count, ACTIVITY_MODE);                  // 1 for activity
             
             step_count += 1;
         }

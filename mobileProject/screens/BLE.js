@@ -2,6 +2,7 @@ import React, { Component } from 'react';
 import { Platform, View, Text, StyleSheet, Button, Alert } from 'react-native';
 import { BleManager } from 'react-native-ble-plx'
 import { Buffer } from 'buffer'
+import TimerCountdown from 'react-native-timer-countdown'
 
 
 curr_device = ''
@@ -43,18 +44,6 @@ export default class SensorsComponent extends Component {
       return Buffer.from(data, 'base64').toString('ascii')
     }
 
-    serviceUUID(num) {
-      return this.prefixUUID + num + "0" + this.suffixUUID
-    }
-  
-    notifyUUID(num) {
-      return this.prefixUUID + num + "1" + this.suffixUUID
-    }
-  
-    writeUUID(num) {
-      return this.prefixUUID + num + "2" + this.suffixUUID
-    }
-
     info(message) {
         this.setState({info: message})
     }
@@ -67,15 +56,15 @@ export default class SensorsComponent extends Component {
     this.setState({values: {...this.state.values, [key]: value}})
     }
 
-    componentWillMount() {
-      if (Platform.OS === 'ios') {
-          this.manager.onStateChange((state) => {
-          if (state === 'PoweredOn') this.scanAndConnect()
-          })
-      } else {
-          this.scanAndConnect()
-      }
-    }
+    // componentWillMount() {
+    //   if (Platform.OS === 'ios') {
+    //       this.manager.onStateChange((state) => {
+    //       if (state === 'PoweredOn') this.scanAndConnect()
+    //       })
+    //   } else {
+    //       this.scanAndConnect()
+    //   }
+    // }
 
     scanAndConnect() {
       this.manager.startDeviceScan(null, null, (error, device) => {
@@ -97,24 +86,13 @@ export default class SensorsComponent extends Component {
             return device.discoverAllServicesAndCharacteristics()
           })
           .then((device) => {
-            this.info('READY');
-            curr_device = device
-
-          // device.writeCharacteristicWithResponseForService(this.NordicserviceUUID, this.TXcharacteristic, 'NzZCUE0=')
-          //   .then((characteristic) => {
-          //     //this.info(characteristic.value);
-          //     return 
-          //   }) 
-          //   .then (() => {
-          //     device.readCharacteristicForService(this.NordicserviceUUID, this.TXcharacteristic)
-          //       .then((characteristic) => {
-          //         text = Buffer.from(characteristic.value, 'base64').toString('ascii')
-          //         this.info(text);
-          //         return
-          //       })
-          //   })
-        
-        })
+            device.writeCharacteristicWithResponseForService(this.NordicserviceUUID, this.TXcharacteristic, this.dataSender('BLE READY'))
+              .then((characteristic) => {
+                this.info('BLE READY');
+                curr_device = device
+                return 
+              }) 
+          })
           .catch((error) => {
             this.error(error.message)
           })
@@ -131,32 +109,50 @@ export default class SensorsComponent extends Component {
           
           <Text>{this.state.info}</Text>
 
-          {Object.keys(this.sensorData).map((key) => {
+          {Object.keys(this.sensorData).map((sensor_name) => {
               return <Text>
-                        {key + ": " + this.sensorData[key] }
+                        {sensor_name + ": " + this.sensorData[sensor_name] }
                      </Text>
           })}
 
           <View style={styles.button}>
-            <Button title="LED ON" onPress={()=> {
-              curr_device.writeCharacteristicWithResponseForService(this.NordicserviceUUID, this.RXcharacteristic, this.dataSender('LED ON'))
+            <Button title="START CONNECTION" onPress={()=> {
+              if (Platform.OS === 'ios') {
+                this.manager.onStateChange((state) => {
+                if (state === 'PoweredOn') this.scanAndConnect()
+                })
+              } else {
+                  this.scanAndConnect()
+              }
+
+
             }}/>
           </View>
 
-          <View style={styles.button}>
+          {/* <View style={styles.button}>
             <Button title="LED OFF" onPress={()=> {
               curr_device.writeCharacteristicWithResponseForService(this.NordicserviceUUID, this.RXcharacteristic, this.dataSender('LED OFF'))
             }}/>
-          </View>
+          </View> */}
 
           <View style={styles.button}>
             <Button title="ACTIVITY MODE" onPress={()=> {
               curr_device.writeCharacteristicWithResponseForService(this.NordicserviceUUID, this.RXcharacteristic, this.dataSender('ACTIVITY'))
+              this.props.navigation.navigate('Activity_mode')
             }}/>
           </View>
 
           <View style={styles.button}>
-            <Button title="READ HEARTRATE " onPress={()=> {
+            <Button title="SLEEP MODE" onPress={()=> {
+              curr_device.writeCharacteristicWithResponseForService(this.NordicserviceUUID, this.RXcharacteristic, this.dataSender('SLEEP'))
+              this.props.navigation.navigate('Sleep_mode')
+            }}/>
+          </View>
+
+          <TimerCountdown
+            initialSecondsRemaining={1000*30}
+            onTick={secondsRemaining => console.log('tick', secondsRemaining)}
+            onTimeElapsed={() => {
               curr_device.readCharacteristicForService(this.NordicserviceUUID, this.TXcharacteristic)
               .then((characteristic) => {
                 this.info('DATA RECEIVED');
@@ -175,8 +171,10 @@ export default class SensorsComponent extends Component {
                 this.setState(this.state)
                 return
               })
-            }}/>
-          </View>
+            }}
+            allowFontScaling={true}
+            style={{ fontSize: 20 }}
+          />
 
 
         </View>

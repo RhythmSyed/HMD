@@ -15,6 +15,11 @@
     void e_paper_task(void *pvParameter);
     // Functions    
     void Epaper_display();
+
+    enum Mode_select {
+        SLEEP_MODE = 0,
+        ACTIVITY_MODE
+    };
 /***************/
 
 
