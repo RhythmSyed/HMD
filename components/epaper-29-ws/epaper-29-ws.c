@@ -191,7 +191,8 @@ static void iot_epaper_set_lut(epaper_handle_t dev)
     epaper_dev_t* device = (epaper_dev_t*) dev;
     xSemaphoreTakeRecursive(device->spi_mux, portMAX_DELAY);
     iot_epaper_send_command(dev, E_PAPER_WRITE_LUT_REGISTER);
-    iot_epaper_send_data(dev, lut_full_update, sizeof(lut_full_update));
+    //iot_epaper_send_data(dev, lut_full_update, sizeof(lut_full_update));
+    iot_epaper_send_data(dev, lut_partial_update, sizeof(lut_partial_update));
     xSemaphoreGiveRecursive(device->spi_mux);
 }
 
