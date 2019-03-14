@@ -11,6 +11,8 @@
 /*** E-Paper ***/
     // Image Array
     extern const unsigned char IMAGE_DATA[];
+    extern const unsigned char GIMAGE_RUNNING[];
+    extern const unsigned char GIMAGE_HMD[];
     // Tasks
     void e_paper_task(void *pvParameter);
     // Functions    

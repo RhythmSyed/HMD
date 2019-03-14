@@ -99,6 +99,7 @@ typedef struct {
     int width;
     int height;
     bool color_inv;
+    bool partial_update;
 } epaper_conf_t;
 
 typedef void* epaper_handle_t; /*handle of epaper*/
@@ -317,6 +318,8 @@ void iot_epaper_draw_circle(epaper_handle_t dev, int x, int y, int radius,
 void iot_epaper_draw_filled_circle(epaper_handle_t dev, int x, int y,
         int radius, int colored);
 
+void iot_epaper_draw_image(epaper_handle_t dev, int x, int y, const unsigned char* frame_buffer, int buffer_width, int buffer_height);
+
 /**
  * @brief  wait until idle
  * @param  dev object handle of epaper
@@ -331,11 +334,18 @@ void iot_epaper_wait_idle(epaper_handle_t dev);
 void iot_epaper_reset(epaper_handle_t dev);
 
 /**
- * @brief dispaly frame, refresh screen
+ * @brief display frame, refresh screen
  *
  * @param dev object handle of epaper
  */
 void iot_epaper_display_frame(epaper_handle_t dev, const unsigned char* frame_buffer);
+
+/**
+ * @brief display frame, refresh screen
+ *
+ * @param dev object handle of epaper
+ */
+void iot_epaper_display_frame_at(epaper_handle_t dev, int x, int y, const unsigned char* frame_buffer, int buffer_width, int buffer_height);
 
 /**
  * @brief   After this command is transmitted, the chip would enter the deep-sleep mode to save power.
