@@ -194,17 +194,8 @@ void Epaper_display(int mode_data, int mode) {
 
 }
 
-
-void e_paper_task(void *pvParameter)
-{  
-
-    while(1){
-        epaper_handle_t device = NULL;
-        device = init_epaper_device(true);
-
-        iot_epaper_set_rotate(device, E_PAPER_ROTATE_270); //may need to change
-        iot_epaper_clean_paint(device, UNCOLORED); // set screen to white
-
+static void epaper_draw_activity_mode(epaper_handle_t device, int * position){
+    
         iot_epaper_draw_string(device, 10, 10, "Activity", &epaper_font_24, COLORED);
         iot_epaper_draw_string(device, 10, 33, "Monitoring", &epaper_font_24, COLORED);
         iot_epaper_draw_rectangle(device, 5, 5, 195, 65, COLORED);
@@ -212,16 +203,79 @@ void e_paper_task(void *pvParameter)
         iot_epaper_draw_string(device, 10, 90, "Steps: XXX", &epaper_font_24, COLORED);
 
         iot_epaper_draw_circle(device, 168, 168, 27, COLORED);
-        iot_epaper_draw_image(device, 147, 162, GIMAGE_HMD, 45, 16);
+        iot_epaper_draw_image(device, 147, 161, GIMAGE_HMD, 45, 16);
+        switch((*position)++){
+            case 0:
+                iot_epaper_draw_image(device, 5, 145, GIMAGE_RUNNING, 50, 50);
+                break;
+            case 1:
+                iot_epaper_draw_image(device, 30, 145, GIMAGE_RUNNING, 50, 50);
+                break;
+            case 2:
+                iot_epaper_draw_image(device, 55, 145, GIMAGE_RUNNING, 50, 50);
+                break;
+            case 3:
+                iot_epaper_draw_image(device, 80, 145, GIMAGE_RUNNING, 50, 50);
+                (*position) = 0;
+                break;
+            default:
+                printf("ERROR! \n");
+        }
 
-        iot_epaper_draw_image(device, 5, 145, GIMAGE_RUNNING, 50, 50);
+}
+
+static void epaper_draw_sleep_mode(epaper_handle_t device, int * position){
+    iot_epaper_draw_string(device, 10, 10, "Sleep", &epaper_font_24, COLORED);
+    iot_epaper_draw_string(device, 10, 33, "Monitoring", &epaper_font_24, COLORED);
+    iot_epaper_draw_rectangle(device, 5, 5, 195, 65, COLORED);
+
+    iot_epaper_draw_string(device, 10, 70, "BPM: XXX", &epaper_font_24, COLORED);
+    iot_epaper_draw_string(device, 10, 90, "Sleep Quality:", &epaper_font_20, COLORED);
+    iot_epaper_draw_string(device, 10, 115, "XXXXXXX", &epaper_font_24, COLORED);
+
+    iot_epaper_draw_circle(device, 168, 168, 27, COLORED);
+    iot_epaper_draw_image(device, 147, 161, GIMAGE_HMD, 45, 16);
+    switch((*position)++){
+        case 0:
+            iot_epaper_draw_image(device, 5, 145, GIMAGE_Z, 37, 50);
+            break;
+        case 1:
+            iot_epaper_draw_image(device, 5, 145, GIMAGE_Z, 37, 50);
+            iot_epaper_draw_image(device, 30, 145, GIMAGE_Z, 37, 50);
+            break;
+        case 2:
+            iot_epaper_draw_image(device, 55, 145, GIMAGE_Z, 37, 50);
+            break;
+        case 3:
+            iot_epaper_draw_image(device, 80, 145, GIMAGE_Z, 37, 50);
+            (*position) = 0;
+            break;
+        default:
+            printf("ERROR! \n");
+    }
+
+}
+
+
+
+void e_paper_task(void *pvParameter)
+{  
+    epaper_handle_t device = NULL;
+    device = init_epaper_device(true);
+
+    int position = 0;
+
+    while(1){
+        iot_epaper_set_rotate(device, E_PAPER_ROTATE_270); //may need to change
+        iot_epaper_clean_paint(device, UNCOLORED); // set screen to white
+
+        //epaper_draw_activity_mode(device, &position);
+        epaper_draw_sleep_mode(device, &position);
 
         iot_epaper_display_frame(device, NULL); // display internal frame buffer
 
-        
-
-        iot_epaper_delete(device, true);// delete drive to enter into sleep mode
-        
-        vTaskDelay(5000 / portTICK_PERIOD_MS);
+        iot_epaper_sleep(device);
+        vTaskDelay(1000 / portTICK_PERIOD_MS);
     }
 }
+
