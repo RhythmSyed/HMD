@@ -1,0 +1,8 @@
+Run 'npm install' after git pull to install dependencies
+
+
+Sequence of App:
+    1. App.js: the main script of the application, provides layout to 3 additional screens using StackNavigator
+    2. /screens/Splash.js: first page, simple title screen
+    3. /screens/Countdown.js: second page, countdown screen once fall is detected
+    4. /screens/Locator.js: third page, if the user is not okay, get location, call for help
