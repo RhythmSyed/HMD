@@ -194,7 +194,9 @@ static struct gatts_char_inst gl_char[GATTS_CHAR_NUM] = {
 
 void send_BLE(uint32_t *data, char sensor) {
 	char str[GATTS_CHAR_VAL_LEN_MAX];
+	memset(str, 0x00, GATTS_CHAR_VAL_LEN_MAX);
 	sprintf(str, "%u%c", *data, sensor);
+	memset(char2_str, 0x00, GATTS_CHAR_VAL_LEN_MAX);
 	memcpy(char2_str, &str, sizeof(uint32_t) + 1);
 }
 
