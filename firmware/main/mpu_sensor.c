@@ -18,7 +18,6 @@
 #define MPU6050_ACCEL_XOUT_H 0x3B
 #define MPU6050_PWR_MGMT_1   0x6B
 
-
 /*
  * The following registers contain the primary data we are interested in
  * 0x3B MPU6050_ACCEL_XOUT_H
