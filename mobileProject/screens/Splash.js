@@ -31,19 +31,11 @@ class Splash extends Component {
         return (
             <View style={styles.container}>
                 <Text style={styles.title}>HMD: Health Monitoring Device</Text>
-
-                <View style={styles.button}>
-                    <Button title="Send Instruction" onPress={()=> {
-                        device.publish('hmd_test', JSON.stringify(counter+'H'))    
-                    }}/>
-                </View>
-
-                <View style={styles.button}>
-                    <Button title="Connect to HMD" onPress={()=> {
-                        this.props.navigation.navigate('BLE')
-                    }}/>
-                </View>
-
+                    <View style={styles.button}>
+                        <Button title="Connect to HMD" onPress={()=> {
+                            this.props.navigation.navigate('BLE')
+                        }}/>
+                    </View>
             </View>
         );
     }

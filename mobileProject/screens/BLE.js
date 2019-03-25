@@ -2,7 +2,7 @@ import React, { Component } from 'react';
 import { Platform, View, Text, StyleSheet, Button, Alert } from 'react-native';
 import { BleManager } from 'react-native-ble-plx'
 import { Buffer } from 'buffer'
-import TimerCountdown from 'react-native-timer-countdown'
+import AwesomeButton from "react-native-really-awesome-button";
 
 
 curr_device = ''
@@ -20,7 +20,7 @@ export default class SensorsComponent extends Component {
       this.manager = new BleManager()
       
       this.state = {
-        info: "", values: {}
+        info: "PAIR", values: {}
       }
 
       this.sensorData = {
@@ -55,16 +55,6 @@ export default class SensorsComponent extends Component {
     updateValue(key, value) {
     this.setState({values: {...this.state.values, [key]: value}})
     }
-
-    // componentWillMount() {
-    //   if (Platform.OS === 'ios') {
-    //       this.manager.onStateChange((state) => {
-    //       if (state === 'PoweredOn') this.scanAndConnect()
-    //       })
-    //   } else {
-    //       this.scanAndConnect()
-    //   }
-    // }
 
     scanAndConnect() {
       this.manager.startDeviceScan(null, null, (error, device) => {
@@ -106,27 +96,27 @@ export default class SensorsComponent extends Component {
     render() {
     return (
         <View>
-          
-          <Text>{this.state.info}</Text>
-
-          {Object.keys(this.sensorData).map((sensor_name) => {
-              return <Text>
-                        {sensor_name + ": " + this.sensorData[sensor_name] }
-                     </Text>
-          })}
-
+          <Text style={styles.title}>PAIRING MODE</Text>
           <View style={styles.button}>
-            <Button title="START CONNECTION" onPress={()=> {
-              if (Platform.OS === 'ios') {
-                this.manager.onStateChange((state) => {
-                if (state === 'PoweredOn') this.scanAndConnect()
-                })
-              } else {
-                  this.scanAndConnect()
-              }
+
+            <AwesomeButton
+              progress
+              stretch
+              onPress={next => {  
+                if (Platform.OS === 'ios') {
+                  this.manager.onStateChange((state) => {
+                  if (state === 'PoweredOn') this.scanAndConnect()
+                  })
+                } else {
+                    this.scanAndConnect()
+                }
+                next();
+              }}
+            >
+              {this.state.info}
+            </AwesomeButton>
 
 
-            }}/>
           </View>
 
           {/* <View style={styles.button}>
@@ -135,48 +125,25 @@ export default class SensorsComponent extends Component {
             }}/>
           </View> */}
 
-          <View style={styles.button}>
+          <View style={styles.activity_button}>
             <Button title="ACTIVITY MODE" onPress={()=> {
               curr_device.writeCharacteristicWithResponseForService(this.NordicserviceUUID, this.RXcharacteristic, this.dataSender('ACTIVITY'))
-              this.props.navigation.navigate('Activity_mode')
+              this.props.navigation.navigate('Activity_mode', {
+                device: curr_device,
+                this: this
+              })
             }}/>
           </View>
 
-          <View style={styles.button}>
+          <View style={styles.sleep_button}>
             <Button title="SLEEP MODE" onPress={()=> {
               curr_device.writeCharacteristicWithResponseForService(this.NordicserviceUUID, this.RXcharacteristic, this.dataSender('SLEEP'))
-              this.props.navigation.navigate('Sleep_mode')
+              this.props.navigation.navigate('Sleep_mode', {
+                device: curr_device,
+                this: this
+              })
             }}/>
           </View>
-
-          <TimerCountdown
-            initialSecondsRemaining={1000*30}
-            onTick={secondsRemaining => console.log('tick', secondsRemaining)}
-            onTimeElapsed={() => {
-              curr_device.readCharacteristicForService(this.NordicserviceUUID, this.TXcharacteristic)
-              .then((characteristic) => {
-                this.info('DATA RECEIVED');
-                incoming_data = this.dataReceiver(characteristic.value)
-                console.log('incoming_data: ' + incoming_data)
-                
-
-                if (incoming_data.indexOf('H') > -1) {
-                  this.sensorData.HeartRate = incoming_data
-                } else if (incoming_data.indexOf('A') > -1) {
-                  this.sensorData.Accelerometer = incoming_data
-                } else if (incoming_data.indexOf('G') > -1) {
-                  this.sensorData.Gyroscope = incoming_data
-                }
-
-                this.setState(this.state)
-                return
-              })
-            }}
-            allowFontScaling={true}
-            style={{ fontSize: 20 }}
-          />
-
-
         </View>
         
     )
@@ -185,7 +152,20 @@ export default class SensorsComponent extends Component {
 
 
 const styles = StyleSheet.create({
-  button: {
+  activity_button: {
+    marginTop: 100
+  },
+  sleep_button: {
     marginTop: 10
+  },
+  title: {
+    fontWeight: 'bold',
+    fontSize: 18,
+    color: 'black',
+    marginBottom: 20,
+    textAlign: 'center'
   }
-});
+
+
+
+}); 

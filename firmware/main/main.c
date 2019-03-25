@@ -89,9 +89,9 @@ void app_main() {
     //xTaskCreate(&MPU_task, "MPU_task", 4096, NULL, 5, NULL);
     
     /* Task used to test the epaper display*/
-    xTaskCreate(&e_paper_task, "test_epaper_task", 4 * 1024, NULL, 5, NULL);
+    //xTaskCreate(&e_paper_task, "test_epaper_task", 4 * 1024, NULL, 5, NULL);
 
-    //xTaskCreate(&ActivityMode_task, "ActivityMode_task", 4096, NULL, 5, NULL);
+    xTaskCreate(&ActivityMode_task, "ActivityMode_task", 4096, NULL, 5, NULL);
     //xTaskCreate(&SleepMode_task, "SleepMode_task", 4096, NULL, 5, NULL);
 
 }
