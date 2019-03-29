@@ -162,21 +162,6 @@
 &lt;p&gt;THIS SOFTWARE IS PROVIDED ''AS IS'' AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED.  IN NO EVENT SHALL THE INSTITUTE OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,  BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 &lt;/p&gt;</description>
 <packages>
-<package name="FIDUCIAL_1MM">
-<smd name="1" x="0" y="0" dx="1" dy="1" layer="1" roundness="100" cream="no"/>
-<wire x1="-0.75" y1="0" x2="0" y2="0.75" width="0.5" layer="29" curve="-90"/>
-<wire x1="0" y1="0.75" x2="0.75" y2="0" width="0.5" layer="29" curve="-90"/>
-<wire x1="0.75" y1="0" x2="0" y2="-0.75" width="0.5" layer="29" curve="-90"/>
-<wire x1="0" y1="-0.75" x2="-0.75" y2="0" width="0.5" layer="29" curve="-90"/>
-<wire x1="-0.75" y1="0" x2="0" y2="0.75" width="0.5" layer="41" curve="-90"/>
-<wire x1="0" y1="0.75" x2="0.75" y2="0" width="0.5" layer="41" curve="-90"/>
-<wire x1="0.75" y1="0" x2="0" y2="-0.75" width="0.5" layer="41" curve="-90"/>
-<wire x1="0" y1="-0.75" x2="-0.75" y2="0" width="0.5" layer="41" curve="-90"/>
-<wire x1="-0.75" y1="0" x2="0" y2="0.75" width="0.5" layer="39" curve="-90"/>
-<wire x1="0" y1="0.75" x2="0.75" y2="0" width="0.5" layer="39" curve="-90"/>
-<wire x1="0.75" y1="0" x2="0" y2="-0.75" width="0.5" layer="39" curve="-90"/>
-<wire x1="0" y1="-0.75" x2="-0.75" y2="0" width="0.5" layer="39" curve="-90"/>
-</package>
 <package name="CR2032_SMT_BAT-HLD-001">
 <smd name="+$1" x="-11.43" y="0" dx="2.54" dy="5.08" layer="1"/>
 <smd name="+$2" x="11.43" y="0" dx="2.54" dy="5.08" layer="1"/>
@@ -240,17 +225,6 @@
 <wire x1="3.9" y1="-0.2" x2="7" y2="-0.2" width="0.127" layer="51" curve="-298.397108"/>
 <wire x1="-7.2" y1="-0.2" x2="-4" y2="-0.2" width="0.127" layer="51" curve="-297.75506"/>
 <circle x="0" y="0" radius="10.16" width="0.127" layer="51"/>
-</package>
-<package name="SYMBOL_PLUS">
-<description>&lt;b&gt;ICON&lt;/b&gt;&lt;p&gt; Plus Sign Symbol</description>
-<wire x1="0.3968" y1="0" x2="-0.3969" y2="0" width="0.3048" layer="21"/>
-<wire x1="0" y1="0.3968" x2="0" y2="-0.3968" width="0.3048" layer="21"/>
-<circle x="0" y="0" radius="0.7817" width="0.2032" layer="21"/>
-</package>
-<package name="SYMBOL_MINUS">
-<description>&lt;b&gt;ICON&lt;/b&gt;&lt;p&gt; Minus Symbol</description>
-<wire x1="0.3968" y1="0" x2="-0.3969" y2="0" width="0.3048" layer="21"/>
-<circle x="0" y="0" radius="0.7817" width="0.2032" layer="21"/>
 </package>
 </packages>
 </library>
@@ -464,18 +438,10 @@ Please make sure your boards conform to these design rules.
 </pass>
 </autorouter>
 <elements>
-<element name="FID1" library="microbuilder" package="FIDUCIAL_1MM" value="FIDUCIAL&quot;&quot;" x="5.334" y="5.334" smashed="yes" rot="R270">
-<attribute name="BOM" value="EXCLUDE" x="5.334" y="5.334" size="1.778" layer="27" rot="R270" display="off"/>
-</element>
-<element name="FID2" library="microbuilder" package="FIDUCIAL_1MM" value="FIDUCIAL&quot;&quot;" x="40.002" y="29.128" smashed="yes" rot="R270">
-<attribute name="BOM" value="EXCLUDE" x="40.002" y="29.128" size="1.778" layer="27" rot="R270" display="off"/>
-</element>
 <element name="B1" library="microbuilder" package="CR2032_SMT_BAT-HLD-001" value="" x="32.255" y="20.492" smashed="yes" rot="R90">
-<attribute name="VALUE" x="40.615" y="10.078" size="0.4064" layer="27" font="vector" ratio="10" rot="R90"/>
+<attribute name="VALUE" x="40.615" y="10.078" size="0.4064" layer="16" font="vector" ratio="10" rot="R90"/>
 </element>
 <element name="CN1" library="adafruit2" package="1X04-CLEANBIG" value="1X4-CLEANBIG" x="2.9" y="17.65" smashed="yes" rot="R90"/>
-<element name="U$6" library="microbuilder" package="SYMBOL_PLUS" value="" x="2.878" y="24.315" smashed="yes" rot="R270"/>
-<element name="U$7" library="microbuilder" package="SYMBOL_MINUS" value="" x="2.778" y="11.077" smashed="yes" rot="R270"/>
 </elements>
 <signals>
 <signal name="GND">
@@ -486,14 +452,6 @@ Please make sure your boards conform to these design rules.
 <wire x1="32.255" y1="20.492" x2="24.363" y2="12.6" width="1.016" layer="1"/>
 <wire x1="24.363" y1="12.6" x2="4.14" y2="12.6" width="1.016" layer="1"/>
 <wire x1="2.9" y1="13.84" x2="4.14" y2="12.6" width="1.016" layer="1"/>
-<polygon width="0" layer="1" isolate="0.4064">
-<vertex x="0.8" y="35.1"/>
-<vertex x="42.7" y="35.1"/>
-<vertex x="42.7" y="35"/>
-<vertex x="42.7" y="6.9"/>
-<vertex x="1" y="6.9"/>
-<vertex x="0.8" y="6.9"/>
-</polygon>
 </signal>
 <signal name="VCC">
 <contactref element="CN1" pad="4"/>

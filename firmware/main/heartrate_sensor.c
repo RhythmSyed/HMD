@@ -60,7 +60,7 @@ uint32_t heartRate_collect_data(int *down_count, int *up_count, uint32_t *expire
     hrt_bt_adc_val = adc1_get_raw(ADC1_CHANNEL_0);
     // printf("down_count: %d\n", *down_count);
     // printf("up_count: %d\n", *up_count);
-    // printf("hrt_bt_adc_val: %d\n", hrt_bt_adc_val);
+    printf("hrt_bt_adc_val: %d\n", hrt_bt_adc_val);
 
     /* Thresholds to calculate the if there was a heart beat or not */
     if( hrt_bt_adc_val < 1683){
@@ -94,7 +94,7 @@ uint32_t heartRate_collect_data(int *down_count, int *up_count, uint32_t *expire
 
         //configPRINTF( ( "BEAT! ADC Val: %d  BPM: %d \r\n", hrt_bt_adc_val, bpm ) );
         //printf("BEAT! ADC Val: %d  BPM: %d \r\n", hrt_bt_adc_val, bpm);
-        //printf("BEAT! ADC Val: %d  BPM: %d\n", hrt_bt_adc_val, bpm);
+        printf("BEAT! ADC Val: %d  BPM: %d\n", hrt_bt_adc_val, bpm);
         /* Reset timer */
         xTimerReset(*bpm_timer, 0);
         vTimerSetTimerID(*bpm_timer, 0);

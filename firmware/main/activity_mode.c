@@ -15,10 +15,7 @@ void ActivityMode_task(void *pvParameters) {
     struct motionTracker MPU_data = {
         .accel_x = 0,
         .accel_y = 0,
-        .accel_z = 0,
-        .gyro_x = 0,
-        .gyro_y = 0,
-        .gyro_z = 0
+        .accel_z = 0
     };
 
     while(1) {

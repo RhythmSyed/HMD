@@ -867,7 +867,9 @@ DIN A4, landscape with location and doc. field</description>
 <part name="B1" library="microbuilder" deviceset="BATTERY" device="CR2032_BAT-HLD-001"/>
 <part name="CN1" library="adafruit2" deviceset="1X4" device="-CLEANBIG"/>
 <part name="GND1" library="supply1" deviceset="GND" device=""/>
-<part name="FRAME1" library="microbuilder" deviceset="FRAME_A4" device=""/>
+<part name="FRAME1" library="microbuilder" deviceset="FRAME_A4" device="">
+<attribute name="TITLE" value="Senior Design Team 06"/>
+</part>
 </parts>
 <sheets>
 <sheet>
@@ -889,9 +891,10 @@ DIN A4, landscape with location and doc. field</description>
 </instance>
 <instance part="FRAME1" gate="G$1" x="0" y="0" smashed="yes"/>
 <instance part="FRAME1" gate="G$3" x="134.62" y="2.54" smashed="yes">
-<attribute name="SHEET" x="243.84" y="5.08" size="2.54" layer="94" font="vector" ratio="10"/>
+<attribute name="SHEET" x="243.84" y="5.08" size="2.54" layer="94" font="vector" ratio="10" display="name"/>
 <attribute name="DRAWING_NAME" x="167.9575" y="5.08" size="2.54" layer="94" ratio="10"/>
 <attribute name="LAST_DATE_TIME" x="167.64" y="11.43" size="2.54" layer="94" ratio="10"/>
+<attribute name="TITLE" x="157.48" y="22.86" size="1.778" layer="96"/>
 </instance>
 </instances>
 <busses>

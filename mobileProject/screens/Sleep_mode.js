@@ -1,25 +1,65 @@
 import React, { Component } from 'react';
 import { StyleSheet, Text, View, Button, Alert } from 'react-native';
-import awsIot from 'aws-iot-device-sdk';
+import TimerCountdown from 'react-native-timer-countdown';
 
 
-class Sleep_mode extends Component {
+class Activity_mode extends Component {
+    constructor() {
+        super()
+        this.sensorData = {
+            HeartRate: "",
+            Accelerometer: "",
+            Gyroscope: ""
+        }
+    }
+    
     render() {
+        const { navigation } = this.props
+        ble_context = navigation.getParam('ble_context', 'NO-THIS')
+        AWSdevice = navigation.getParam('AWSdevice', 'NO-AWSDEVICE')
+
         return (
+            
             <View style={styles.container}>
                 <Text style={styles.title}>SLEEP MODE</Text>
+                
+                {Object.keys(this.sensorData).map((sensor_name) => {
+                    return <Text>
+                                {sensor_name + ": " + this.sensorData[sensor_name] }
+                            </Text>
+                })}
 
-                <View style={styles.button}>
-                    <Button title="Start Tracking" onPress={()=> {  
-                    }}/>
-                </View>
+                <TimerCountdown
+                    initialSecondsRemaining={1000*1}
+                    onTick={secondsRemaining => console.log('tick', secondsRemaining)}
+                    onTimeElapsed={() => {
+                        ble_context.curr_device.readCharacteristicForService(ble_context.NordicserviceUUID, ble_context.TXcharacteristic)
+                        .then((characteristic) => {
+                            ble_context.info('DATA RECEIVED');
+                            incoming_data = ble_context.dataReceiver(characteristic.value)
+                            console.log('incoming_data: ' + incoming_data)
 
+                            if (incoming_data.indexOf('H') > -1) {
+                                this.sensorData.HeartRate = incoming_data
+                            } else if (incoming_data.indexOf('A') > -1) {
+                                this.sensorData.Accelerometer = incoming_data
+                            } else if (incoming_data.indexOf('G') > -1) {
+                                this.sensorData.Gyroscope = incoming_data
+                            }
+
+                            this.setState(this.sensorData)
+                            return
+                        })
+                    }}
+                    allowFontScaling={true}
+                    style={{ fontSize: 10 }}
+                />
             </View>
         );
     }
 }
 
-export default Sleep_mode;
+export default Activity_mode;
 
 
 const styles = StyleSheet.create({

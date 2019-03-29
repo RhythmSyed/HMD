@@ -2,7 +2,7 @@ import React, {Component} from 'react';
 import { createStackNavigator } from 'react-navigation';
 
 import Splash from './screens/Splash';
-import BLE from './screens/BLE';
+import BLEPairing_mode from './screens/BLEPairing_mode';
 import Sleep_mode from './screens/Sleep_mode';
 import Activity_mode from './screens/Activity_mode';
 
@@ -16,7 +16,7 @@ export default class App extends Component {
 
 const StackNav = createStackNavigator({
   Splash: Splash,
-  BLE: BLE,
+  BLEPairing_mode: BLEPairing_mode,
   Activity_mode: Activity_mode,
   Sleep_mode: Sleep_mode
 });

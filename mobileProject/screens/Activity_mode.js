@@ -4,52 +4,59 @@ import TimerCountdown from 'react-native-timer-countdown';
 
 
 class Activity_mode extends Component {
-    render() {
+    constructor() {
+        super()
+        this.sensorData = {
+            HeartRate: "",
+            Accelerometer: "",
+            Gyroscope: ""
+        }
+    }
+    
+    dataHandler() {
+        
+    }
 
+    render() {
         const { navigation } = this.props
-        curr_device = navigation.getParam('device', 'NO-DEVICE')
-        new_this = navigation.getParam('this', 'NO-THIS')
+        ble_context = navigation.getParam('ble_context', 'NO-THIS')
 
         return (
             
             <View style={styles.container}>
                 <Text style={styles.title}>ACTIVITY MODE</Text>
-                {Object.keys(new_this.sensorData).map((sensor_name) => {
+                
+                {Object.keys(this.sensorData).map((sensor_name) => {
                     return <Text>
-                                {sensor_name + ": " + new_this.sensorData[sensor_name] }
+                                {sensor_name + ": " + this.sensorData[sensor_name] }
                             </Text>
                 })}
 
-                <View style={styles.button}>
-                    <Button title="Start Tracking" onPress={()=> {  
-                    }}/>
-                </View>
-
                 <TimerCountdown
-                    initialSecondsRemaining={1000*30}
+                    initialSecondsRemaining={1000*1}
                     onTick={secondsRemaining => console.log('tick', secondsRemaining)}
                     onTimeElapsed={() => {
-                        curr_device.readCharacteristicForService(new_this.NordicserviceUUID, new_this.TXcharacteristic)
+                        ble_context.curr_device.readCharacteristicForService(ble_context.NordicserviceUUID, ble_context.TXcharacteristic)
                         .then((characteristic) => {
-                            new_this.info('DATA RECEIVED');
-                            incoming_data = new_this.dataReceiver(characteristic.value)
+                            ble_context.info('DATA RECEIVED');
+                            incoming_data = ble_context.dataReceiver(characteristic.value)
                             console.log('incoming_data: ' + incoming_data)
-                            
 
                             if (incoming_data.indexOf('H') > -1) {
-                                new_this.sensorData.HeartRate = incoming_data
+                                this.sensorData.HeartRate = incoming_data
                             } else if (incoming_data.indexOf('A') > -1) {
-                                new_this.sensorData.Accelerometer = incoming_data
+                                this.sensorData.Accelerometer = incoming_data
                             } else if (incoming_data.indexOf('G') > -1) {
-                                new_this.sensorData.Gyroscope = incoming_data
+                                this.sensorData.Gyroscope = incoming_data
                             }
 
-                            new_this.setState(new_this.state)
+                            this.setState(this.sensorData)
                             return
                         })
                     }}
                     allowFontScaling={true}
-                    style={{ fontSize: 20 }}
+                    style={{ fontSize: 20,
+                        marginTop: 200 }}
                 />
             </View>
         );
