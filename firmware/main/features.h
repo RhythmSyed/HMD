@@ -64,7 +64,7 @@
 /*************/
 
 
-/*** MPU ***/
+/*** IMU ***/
     // Global Objects
     struct motionTracker {
         double accel_x;
@@ -75,9 +75,9 @@
         double gyro_z;
     };
     // Tasks
-    void MPU_task(void *pvParameter);
+    void IMU_task(void *pvParameter);
     // Functions
-    void MPU_init();
+    void IMU_init();
     void MPU_collect_data(struct motionTracker *MPU_data);
 /***********/
 
