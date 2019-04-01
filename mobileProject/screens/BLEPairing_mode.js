@@ -5,11 +5,8 @@ import { Buffer } from 'buffer'
 import AwesomeButton from "react-native-really-awesome-button";
 import awsIot from 'aws-iot-device-sdk';
 var AWS = require('aws-sdk');
-AWS.config.update({accessKeyId: 'AKIAJTSGA525X7MK5BYQ', secretAccessKey: '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', region: 'us-east-2'});
+AWS.config.update({accessKeyId: 'AKIAIUIKD4PNBBO2TT5A', secretAccessKey: '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', region: 'us-east-2'});
 var ddb = new AWS.DynamoDB({apiVersion: '2012-10-08'});
-var docClient = new AWS.DynamoDB.DocumentClient();
-
-
 const AWSdevice = awsIot.device({
   host: "a358ffdo7gf05m-ats.iot.us-east-2.amazonaws.com",
   clientId: Math.random(),
@@ -21,6 +18,7 @@ const AWSdevice = awsIot.device({
 AWSdevice.on('error', error => {
   console.log(error)
 })
+
 
 export default class BLEPairing_mode extends Component {
 
@@ -37,7 +35,8 @@ export default class BLEPairing_mode extends Component {
       this.NordicserviceUUID = "6e400001-b5a3-f393-e0a9-e50e24dcca9e"
       this.RXcharacteristic = "6e400002-b5a3-f393-e0a9-e50e24dcca9e"
       this.TXcharacteristic = "6e400003-b5a3-f393-e0a9-e50e24dcca9e"
-      this.curr_device = 'NULL'
+      this.curr_device = null
+
     }
   
     dataSender(data) {
@@ -58,6 +57,17 @@ export default class BLEPairing_mode extends Component {
 
     updateValue(key, value) {
     this.setState({values: {...this.state.values, [key]: value}})
+    }
+
+    getTimeStamp() {
+      var date = new Date().getDate(); //Current Date
+      var month = new Date().getMonth() + 1; //Current Month
+      var year = new Date().getFullYear(); //Current Year
+      var hours = new Date().getHours(); //Current Hours
+      var min = new Date().getMinutes(); //Current Minutes
+      var sec = new Date().getSeconds(); //Current Seconds
+      var timeStamp = date + '/' + month + '/' + year + ' ' + hours + ':' + min + ':' + sec
+      return timeStamp
     }
 
     scanAndConnect() {
@@ -130,39 +140,67 @@ export default class BLEPairing_mode extends Component {
           </View> */}
 
           <View style={styles.activity_button}>
-            <Button title="ACTIVITY MODE" onPress={()=> {
-              this.curr_device.writeCharacteristicWithResponseForService(this.NordicserviceUUID, this.RXcharacteristic, this.dataSender('ACTIVITY'))
+            <Button title="ACTIVITY MODE" onPress={()=> {              
+              if (this.curr_device == null){
+                Alert.alert(
+                  'ERROR',
+                  'HMD NOT PAIRED',
+                  [
+                    {text: 'OK', onPress: () => console.log('OK Pressed')},
+                  ],
+                  {cancelable: false}
+                );
+              }
+              else {
+                this.curr_device.writeCharacteristicWithResponseForService(this.NordicserviceUUID, this.RXcharacteristic, this.dataSender('ACTIVITY'))
+                this.props.navigation.navigate('Activity_mode', {
+                  ble_context: this,
+                  AWSdevice: AWSdevice,
+                  ddb: ddb
+                })
+              }
+
+              // var params1 = {
+              //   TableName:'HMD_DATA',
+              //   Item:{
+              //   'TimeStamp': {S: String(this.getTimeStamp())},
+              //   'HeartRate': {S: String(0)},
+              //   'Accelerometer': {S: String(1)}
+              //   }
+              // };
               
-              var params = {
-                TableName:'ANCHOR_TABLE',
-                Item:{
-                'Anchors': {S: String(1)},
-                'Description': {S: String(2)},
-                'UserId': {S: String(3)}
-                }
-              };
-              
-              ddb.putItem(params, function(err, data) {
-                if (err) {
-                    console.error("Unable to add item. Error JSON:", JSON.stringify(err, null, 2));
-                } else {
-                    console.log("Added item:", JSON.stringify(data, null, 2));
-                }
-              });
-              this.props.navigation.navigate('Activity_mode', {
-                ble_context: this,
-                AWSdevice: AWSdevice
-              })
+              // ddb.putItem(params1, function(err, data) {
+              //   if (err) {
+              //       console.error("Unable to add item. Error JSON:", JSON.stringify(err, null, 2));
+              //   } else {
+              //       console.log("Added item:", JSON.stringify(data, null, 2));
+              //   }
+              // });
+
             }}/>
           </View>
 
           <View style={styles.sleep_button}>
             <Button title="SLEEP MODE" onPress={()=> {
-              this.curr_device.writeCharacteristicWithResponseForService(this.NordicserviceUUID, this.RXcharacteristic, this.dataSender('SLEEP'))
-              this.props.navigation.navigate('Sleep_mode', {
-                ble_context: this,
-                AWSdevice: AWSdevice
-              })
+              if (this.curr_device == null){
+                Alert.alert(
+                  'ERROR',
+                  'HMD NOT PAIRED',
+                  [
+                    {text: 'OK', onPress: () => console.log('OK Pressed')},
+                  ],
+                  {cancelable: false}
+                );
+              }
+              else {
+                this.curr_device.writeCharacteristicWithResponseForService(this.NordicserviceUUID, this.RXcharacteristic, this.dataSender('SLEEP'))
+                this.props.navigation.navigate('Sleep_mode', {
+                  ble_context: this,
+                  AWSdevice: AWSdevice,
+                  ddb: ddb
+                })
+              }
+
             }}/>
           </View>
         </View>
