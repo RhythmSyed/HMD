@@ -21,6 +21,7 @@
 #define I2C_FREQ      I2C_FREQ_100K
 
 #include "features.h"
+#include <string.h>
 
 
 /* -- user tasks --------------------------------------------------- */
@@ -30,7 +31,7 @@ static lis3dh_sensor_t* sensor;
 /**
  * Common function used to get sensor data.
  */
-void read_data ()
+void read_data (display_data_t * display_data)
 {
     lis3dh_float_data_t  data;
 
@@ -40,6 +41,7 @@ void read_data ()
         printf("%.3f LIS3DH (xyz)[g] ax=%+7.3f ay=%+7.3f az=%+7.3f\n",
                (double)sdk_system_get_time()*1e-3, 
                 data.ax, data.ay, data.az);
+    memcpy(&display_data->imu_data, &data, sizeof(data));
 }
 
 
@@ -49,15 +51,17 @@ void read_data ()
 
 void IMU_task(void *pvParameters)
 {
+
+    display_data_t * display_data = (display_data_t *) pvParameters;
     vTaskDelay (100/portTICK_PERIOD_MS);
     
     while (1)
     {
         // read sensor data
-        read_data ();
+        read_data (display_data);
         
         // passive waiting until 1 second is over
-        vTaskDelay(100/portTICK_PERIOD_MS);
+        vTaskDelay(pdMS_TO_TICKS( 1000 ));
     }
 }
 

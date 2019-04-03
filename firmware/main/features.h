@@ -6,6 +6,8 @@
 #include "esp_bt_defs.h"
 #include "esp_bt_main.h"
 
+#include "lis3dh.h"
+
 #define BLE_PROFILE_APP_ID 0
 
 /*** E-Paper ***/
@@ -23,6 +25,11 @@
         SLEEP_MODE = 0,
         ACTIVITY_MODE
     };
+
+    typedef struct {
+        lis3dh_float_data_t imu_data;
+        uint32_t hr_bpm_data;
+    } display_data_t;
 /***************/
 
 
