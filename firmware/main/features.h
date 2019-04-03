@@ -5,7 +5,8 @@
 #include "esp_gatts_api.h"
 #include "esp_bt_defs.h"
 #include "esp_bt_main.h"
-
+#include "epaper-29-ws.h"
+#include "epaper_fonts.h"
 #include "lis3dh.h"
 
 #define BLE_PROFILE_APP_ID 0
@@ -18,8 +19,7 @@
     extern const unsigned char GIMAGE_Z[];
     // Tasks
     void e_paper_task(void *pvParameter);
-    // Functions    
-    void Epaper_display();
+    
 
     enum Mode_select {
         SLEEP_MODE = 0,
@@ -30,6 +30,10 @@
         lis3dh_float_data_t imu_data;
         uint32_t hr_bpm_data;
     } display_data_t;
+
+    // Functions    
+    void Epaper_display();
+    void epaper_draw_sleep_mode(epaper_handle_t device, int * position, display_data_t * display_data);
 /***************/
 
 

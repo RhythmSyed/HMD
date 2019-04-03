@@ -19,7 +19,7 @@
 #include "driver/gpio.h"
 #define TAG "HMD_MAIN"
 
-static display_data_t display_data;
+
 
 void BLE_init() {
     esp_err_t ret;
@@ -64,35 +64,28 @@ void app_main() {
 	}
 	ESP_ERROR_CHECK( ret );
 
-    memset(&display_data, 0x00, sizeof(display_data));
+    display_data_t * display_data = (display_data_t * )calloc(1, sizeof(display_data_t));
+    
 
-    // // initializations
-    // BLE_init();
-    //MPU_init();
+
+    // // initializations ***************************************************** make sure you initiazile!!@@@@@@@@@
+    BLE_init();
     IMU_init();
-    //heartRate_ADC_init();
-    // // gpio_pad_select_gpio(GPIO_NUM_14);
-    // // gpio_set_direction(GPIO_NUM_14, GPIO_MODE_OUTPUT);
+    // heartRate_ADC_init();
 
     // // msg received callbacks
-    // esp_ble_gatts_register_callback(gatts_event_handler);
-    // esp_ble_gap_register_callback(gap_event_handler);
-    // esp_ble_gatts_app_register(BLE_PROFILE_APP_ID);
-
-    // if (gpio_get_level(GPIO_NUM_14)) {
-    //     xTaskCreate(&ActivityMode_task, "SleepMode_task", 4096, NULL, 5, NULL);
-    //} else {
-    //     xTaskCreate(&SleepMode_task, "SleepMode_task", 4096, NULL, 5, NULL);
-    // }
+     esp_ble_gatts_register_callback(gatts_event_handler);
+     esp_ble_gap_register_callback(gap_event_handler);
+     esp_ble_gatts_app_register(BLE_PROFILE_APP_ID);
 
 
     // Main tasks
     //xTaskCreate(&getBPM_task, "getBPM_task", 4096, NULL, 5, NULL);
     //xTaskCreate(&blink_task, "blink_task", configMINIMAL_STACK_SIZE, NULL, 5, NULL);
     //xTaskCreate(&MPU_task, "MPU_task", 4096, NULL, 5, NULL);
-    xTaskCreate(&IMU_task, "IMU_task", 4096, &display_data, 5, NULL);
+     xTaskCreate(&IMU_task, "IMU_task", 2048, display_data, 5, NULL);
     /* Task used to test the epaper display*/
-    xTaskCreate(&e_paper_task, "test_epaper_task", 4 * 1024, &display_data, 5, NULL);
+    xTaskCreate(&e_paper_task, "test_epaper_task", 2 * 1024, display_data, 5, NULL);
 
     //xTaskCreate(&ActivityMode_task, "ActivityMode_task", 4096, NULL, 5, NULL);
     //xTaskCreate(&SleepMode_task, "SleepMode_task", 4096, NULL, 5, NULL);

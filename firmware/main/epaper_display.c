@@ -227,7 +227,7 @@ static void epaper_draw_activity_mode(epaper_handle_t device, int * position, di
 
 }
 
-static void epaper_draw_sleep_mode(epaper_handle_t device, int * position, display_data_t * display_data){
+void epaper_draw_sleep_mode(epaper_handle_t device, int * position, display_data_t * display_data){
     iot_epaper_draw_string(device, 10, 10, "Sleep", &epaper_font_24, COLORED);
     iot_epaper_draw_string(device, 10, 33, "Monitoring", &epaper_font_24, COLORED);
     iot_epaper_draw_rectangle(device, 5, 5, 195, 65, COLORED);
