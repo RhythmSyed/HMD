@@ -40,9 +40,9 @@
 #define GATTS_NUM_HANDLE     1+(3*GATTS_CHAR_NUM)
 #define BLE_DEVICE_NAME            "HMD_wearable"
 #define BLE_MANUFACTURER_DATA_LEN  4
-#define GATTS_CHAR_VAL_LEN_MAX		22
+#define GATTS_CHAR_VAL_LEN_MAX		40
 
-static uint8_t led_stat=0;
+// static uint8_t led_stat=0;
 uint8_t char1_str[GATTS_CHAR_VAL_LEN_MAX] = {0x11,0x22,0x33};
 uint8_t char2_str[GATTS_CHAR_VAL_LEN_MAX] = "bad";
 uint8_t descr1_str[GATTS_CHAR_VAL_LEN_MAX] = {0x11,0x11};
@@ -161,15 +161,7 @@ static struct gatts_char_inst gl_char[GATTS_CHAR_NUM] = {
 				.char_control = NULL,
 				.char_handle = 0,
 				.char_read_callback=char1_read_handler,
-				.char_write_callback=char1_write_handler,
-				.descr_uuid.len = ESP_UUID_LEN_16,
-				.descr_uuid.uuid.uuid16 = ESP_GATT_UUID_CHAR_CLIENT_CONFIG,
-				.descr_perm=ESP_GATT_PERM_READ | ESP_GATT_PERM_WRITE,
-				.descr_val = &gatts_demo_descr1_val,
-				.descr_control=NULL,
-				.descr_handle=0,
-				.descr_read_callback=descr1_read_handler,
-				.descr_write_callback=descr1_write_handler
+				.char_write_callback=char1_write_handler
 		},
 		{
 				.char_uuid.len = ESP_UUID_LEN_128,  // TX
@@ -180,22 +172,14 @@ static struct gatts_char_inst gl_char[GATTS_CHAR_NUM] = {
 				.char_control=NULL,
 				.char_handle=0,
 				.char_read_callback=char2_read_handler,
-				.char_write_callback=char2_write_handler,
-				.descr_uuid.len = ESP_UUID_LEN_16,
-				.descr_uuid.uuid.uuid16 = ESP_GATT_UUID_CHAR_CLIENT_CONFIG, // ESP_GATT_UUID_CHAR_DESCRIPTION,
-				.descr_perm=ESP_GATT_PERM_READ | ESP_GATT_PERM_WRITE,
-				.descr_val = &gatts_demo_descr2_val,
-				.descr_control=NULL,
-				.descr_handle=0,
-				.descr_read_callback=descr2_read_handler,
-				.descr_write_callback=descr2_write_handler
+				.char_write_callback=char2_write_handler
 		}
 };
 
-void send_BLE(uint32_t *data, char sensor) {
+void send_BLE(float *data, char sensor) {
 	char str[GATTS_CHAR_VAL_LEN_MAX];
-	sprintf(str, "%u%c", *data, sensor);
-	memcpy(char2_str, &str, sizeof(uint32_t) + 1);
+	sprintf(str, "%f%c", *data, sensor);
+	memcpy(char2_str, &str, sizeof(float) + sizeof(char));
 }
 
 void char1_read_handler(esp_gatts_cb_event_t event, esp_gatt_if_t gatts_if, esp_ble_gatts_cb_param_t *param) {
@@ -307,13 +291,13 @@ void char1_write_handler(esp_gatts_cb_event_t event, esp_gatt_if_t gatts_if, esp
     esp_ble_gatts_send_response(gatts_if, param->write.conn_id, param->write.trans_id, ESP_GATT_OK, NULL);
     if (strncmp((const char *)gl_char[0].char_val->attr_value,"LED ON", 6)==0) {
     	gpio_set_level(LED_PIN,HIGH);
-    	led_stat=1;
+    	//led_stat=1;
     } else if (strncmp((const char *)gl_char[0].char_val->attr_value,"LED OFF", 7)==0) {
     	gpio_set_level(LED_PIN,LOW);
-    	led_stat=0;
+    	//led_stat=0;
     } else if (strncmp((const char *)gl_char[0].char_val->attr_value,"LED SWITCH",10)==0) {
-    	led_stat=1-led_stat;
-    	gpio_set_level(LED_PIN,led_stat);
+    	//led_stat=1-led_stat;
+    	//gpio_set_level(LED_PIN,led_stat);
     } else if (strncmp((const char *)gl_char[0].char_val->attr_value,"ACTIVITY", 8)==0) {
 		//vTaskSuspend(&SleepMode_task);
 		//xTaskCreate(&ActivityMode_task, "SleepMode_task", 4096, NULL, 5, NULL);

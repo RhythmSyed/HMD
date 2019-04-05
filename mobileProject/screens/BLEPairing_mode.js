@@ -90,7 +90,7 @@ export default class BLEPairing_mode extends Component {
             return device.discoverAllServicesAndCharacteristics()
           })
           .then((device) => {
-            device.writeCharacteristicWithResponseForService(this.NordicserviceUUID, this.TXcharacteristic, this.dataSender('BLE READY'))
+            device.writeCharacteristicWithResponseForService(this.NordicserviceUUID, this.TXcharacteristic, this.dataSender('BLEREADY'))
               .then((characteristic) => {
                 this.info('BLE READY');
                 this.curr_device = device
@@ -160,22 +160,22 @@ export default class BLEPairing_mode extends Component {
                 })
               }
 
-              // var params1 = {
-              //   TableName:'HMD_DATA',
-              //   Item:{
-              //   'TimeStamp': {S: String(this.getTimeStamp())},
-              //   'HeartRate': {S: String(0)},
-              //   'Accelerometer': {S: String(1)}
-              //   }
-              // };
+              var params1 = {
+                TableName:'HMD_DATA',
+                Item:{
+                'TimeStamp': {S: String(this.getTimeStamp())},
+                'HeartRate': {S: String(0)},
+                'Accelerometer': {S: String(1)}
+                }
+              };
               
-              // ddb.putItem(params1, function(err, data) {
-              //   if (err) {
-              //       console.error("Unable to add item. Error JSON:", JSON.stringify(err, null, 2));
-              //   } else {
-              //       console.log("Added item:", JSON.stringify(data, null, 2));
-              //   }
-              // });
+              ddb.putItem(params1, function(err, data) {
+                if (err) {
+                    console.error("Unable to add item. Error JSON:", JSON.stringify(err, null, 2));
+                } else {
+                    console.log("Added item:", JSON.stringify(data, null, 2));
+                }
+              });
 
             }}/>
           </View>

@@ -5,30 +5,27 @@
 #include "epaper-29-ws.h"
 #include "epaper_fonts.h"
 #include <math.h>
+#include <inttypes.h>
 
 void ActivityMode_task(void *pvParameters) {
 
-    int upper_threshold = 30;
+    float upper_threshold = 0.5;
     int step_count = 1;
-    uint32_t gyro_mag = 0;
+    float accel_mag = 0;
 
-    struct motionTracker MPU_data = {
-        .accel_x = 0,
-        .accel_y = 0,
-        .accel_z = 0
-    };
+    display_data_t * display_data = (display_data_t *) pvParameters;
 
     while(1) {
-        // get MPU data
-        MPU_collect_data(&MPU_data);
+        // get IMU data
+        //IMU_recordData(display_data);
         
         // calculate step
-        //accel_mag = sqrt(MPU_data.accel_x*MPU_data.accel_x + MPU_data.accel_y*MPU_data.accel_y + MPU_data.accel_z*MPU_data.accel_z);
-	    gyro_mag = sqrt(MPU_data.gyro_x*MPU_data.gyro_x + MPU_data.gyro_y*MPU_data.gyro_y + MPU_data.gyro_z*MPU_data.gyro_z);
-
-        if (gyro_mag > upper_threshold) {
-            send_BLE(&gyro_mag, 'G');                       // G for gyro
-            Epaper_display(step_count, ACTIVITY_MODE);                  // 1 for activity
+        accel_mag = sqrt(display_data->imu_data.ax*display_data->imu_data.ax + display_data->imu_data.ay*display_data->imu_data.ay + display_data->imu_data.az*display_data->imu_data.az);
+        
+        if (accel_mag > upper_threshold) {
+            printf("accel_mag: %f\n", accel_mag);
+            send_BLE(&accel_mag, 'Z');                       // A for accel
+            //Epaper_display(step_count, ACTIVITY_MODE);                  // 1 for activity
             
             step_count += 1;
         }

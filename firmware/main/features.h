@@ -32,8 +32,8 @@
     } display_data_t;
 
     // Functions    
-    void Epaper_display();
-    void epaper_draw_sleep_mode(epaper_handle_t device, int * position, display_data_t * display_data);
+    //void Epaper_display();
+    //void epaper_draw_sleep_mode(epaper_handle_t device, int * position, display_data_t * display_data);
 /***************/
 
 
@@ -65,7 +65,7 @@
     void char2_write_handler(esp_gatts_cb_event_t event, esp_gatt_if_t gatts_if, esp_ble_gatts_cb_param_t *param);
     void descr2_read_handler(esp_gatts_cb_event_t event, esp_gatt_if_t gatts_if, esp_ble_gatts_cb_param_t *param);
     void descr2_write_handler(esp_gatts_cb_event_t event, esp_gatt_if_t gatts_if, esp_ble_gatts_cb_param_t *param);
-    void send_BLE(uint32_t *data, char sensor);
+    void send_BLE(float *data, char sensor);
 /***********/
 
 
@@ -76,20 +76,10 @@
 
 
 /*** IMU ***/
-    // Global Objects
-    struct motionTracker {
-        double accel_x;
-        double accel_y;
-        double accel_z;
-        double gyro_x;
-        double gyro_y;
-        double gyro_z;
-    };
     // Tasks
     void IMU_task(void *pvParameter);
     // Functions
     void IMU_init();
-    void MPU_collect_data(struct motionTracker *MPU_data);
 /***********/
 
 
