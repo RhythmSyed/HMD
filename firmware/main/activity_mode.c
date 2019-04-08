@@ -13,24 +13,22 @@ void ActivityMode_task(void *pvParameters) {
     int step_count = 1;
     float accel_mag = 0;
 
-    display_data_t * display_data = (display_data_t *) pvParameters;
+    display_data.step_count = 0;
 
     while(1) {
-        // get IMU data
-        //IMU_recordData(display_data);
-        
-        // calculate step
-        accel_mag = sqrt(display_data->imu_data.ax*display_data->imu_data.ax + display_data->imu_data.ay*display_data->imu_data.ay + display_data->imu_data.az*display_data->imu_data.az);
-        
-        if (accel_mag > upper_threshold) {
-            printf("accel_mag: %f\n", accel_mag);
-            send_BLE(&accel_mag, 'Z');                       // A for accel
-            //Epaper_display(step_count, ACTIVITY_MODE);                  // 1 for activity
+        if (display_data.current_mode == ACTIVITY_MODE) {
+            // get IMU data
+            //IMU_recordData(display_data);
             
-            step_count += 1;
+            // calculate step
+            accel_mag = sqrt(display_data.imu_data.ax*display_data.imu_data.ax + display_data.imu_data.ay*display_data.imu_data.ay + display_data.imu_data.az*display_data.imu_data.az);
+            printf("accel_mag: %f\n", accel_mag);
+            if (accel_mag > upper_threshold) {
+                printf("THRESHOLD MET!: %f\n", accel_mag);
+                send_BLE(&accel_mag, 'A');                       // A for accel
+                display_data.step_count += 1;
+            }
         }
-
-
         vTaskDelay(100/portTICK_PERIOD_MS);
     }
 

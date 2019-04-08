@@ -194,16 +194,18 @@ void Epaper_display(int mode_data, int mode) {
 
 }
 
-static void epaper_draw_activity_mode(epaper_handle_t device, int * position, display_data_t * display_data){
-    char steps[sizeof(display_data->imu_data)];
+static void epaper_draw_activity_mode(epaper_handle_t device, int * position){
+    char steps[sizeof(display_data.step_count)];
 
     iot_epaper_draw_string(device, 10, 10, "Activity", &epaper_font_24, COLORED);
     iot_epaper_draw_string(device, 10, 33, "Monitoring", &epaper_font_24, COLORED);
     iot_epaper_draw_rectangle(device, 5, 5, 195, 65, COLORED);
 
-    sprintf(steps, "x=%+7.3f y=%+7.3f z=%+7.3f",
-        display_data->imu_data.ax, display_data->imu_data.ay, display_data->imu_data.az);
-    iot_epaper_draw_string(device, 10, 90, steps, &epaper_font_12, COLORED);
+    // sprintf(steps, "x=%+7.3f y=%+7.3f z=%+7.3f",
+    //     display_data.imu_data.ax, display_data.imu_data.ay, display_data.imu_data.az);
+    
+    sprintf(steps, "Steps=%2d", display_data.step_count);
+    iot_epaper_draw_string(device, 10, 90, steps, &epaper_font_24, COLORED);
 
     iot_epaper_draw_circle(device, 168, 168, 27, COLORED);
     iot_epaper_draw_image(device, 147, 161, GIMAGE_HMD, 45, 16);
@@ -227,7 +229,7 @@ static void epaper_draw_activity_mode(epaper_handle_t device, int * position, di
 
 }
 
-void epaper_draw_sleep_mode(epaper_handle_t device, int * position, display_data_t * display_data){
+void epaper_draw_sleep_mode(epaper_handle_t device, int * position){
     iot_epaper_draw_string(device, 10, 10, "Sleep", &epaper_font_24, COLORED);
     iot_epaper_draw_string(device, 10, 33, "Monitoring", &epaper_font_24, COLORED);
     iot_epaper_draw_rectangle(device, 5, 5, 195, 65, COLORED);
@@ -284,8 +286,8 @@ void e_paper_task(void *pvParameter)
             iot_epaper_display_frame(device, NULL);
             update_count=0;
         }
-        epaper_draw_activity_mode(device, &position, display_data);
-        //epaper_draw_sleep_mode(device, &position, display_data);
+        epaper_draw_activity_mode(device, &position);
+        //epaper_draw_sleep_mode(device, &position);
 
         iot_epaper_display_frame(device, NULL); // display internal frame buffer
 

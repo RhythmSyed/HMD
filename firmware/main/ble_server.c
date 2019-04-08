@@ -299,11 +299,9 @@ void char1_write_handler(esp_gatts_cb_event_t event, esp_gatt_if_t gatts_if, esp
     	//led_stat=1-led_stat;
     	//gpio_set_level(LED_PIN,led_stat);
     } else if (strncmp((const char *)gl_char[0].char_val->attr_value,"ACTIVITY", 8)==0) {
-		//vTaskSuspend(&SleepMode_task);
-		//xTaskCreate(&ActivityMode_task, "SleepMode_task", 4096, NULL, 5, NULL);
+		display_data.current_mode = ACTIVITY_MODE;
 	} else if (strncmp((const char *)gl_char[0].char_val->attr_value,"SLEEP", 5)==0) {
-		//vTaskSuspend(&ActivityMode_task);
-		//xTaskCreate(&SleepMode_task, "SleepMode_task", 4096, NULL, 5, NULL);
+		display_data.current_mode = SLEEP_MODE;
 	}
 	else {
     	char2_notify_handle(gatts_if, param->write.conn_id);

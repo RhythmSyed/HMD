@@ -31,17 +31,17 @@ static lis3dh_sensor_t* sensor;
 /**
  * Common function used to get sensor data.
  */
-void read_data (display_data_t * display_data)
+void read_data ()
 {
     lis3dh_float_data_t  data;
 
     if (lis3dh_new_data (sensor) &&
         lis3dh_get_float_data (sensor, &data))
         // max. full scale is +-16 g and best resolution is 1 mg, i.e. 5 digits
-        printf("%.3f LIS3DH (xyz)[g] ax=%+7.3f ay=%+7.3f az=%+7.3f\n",
-               (double)sdk_system_get_time()*1e-3, 
-                data.ax, data.ay, data.az);
-    memcpy(&display_data->imu_data, &data, sizeof(data));
+        //printf("LIS3DH (xyz)[g] ax=%+7.3f ay=%+7.3f az=%+7.3f\n", data.ax, data.ay, data.az);
+        display_data.imu_data.ax = data.ax;
+        display_data.imu_data.ay = data.ay;
+        display_data.imu_data.az = data.az;
 }
 
 
@@ -51,17 +51,15 @@ void read_data (display_data_t * display_data)
 
 void IMU_task(void *pvParameters)
 {
-
-    display_data_t * display_data = (display_data_t *) pvParameters;
     vTaskDelay (100/portTICK_PERIOD_MS);
     
     while (1)
     {
         // read sensor data
-        read_data (display_data);
+        read_data();
         
         // passive waiting until 1 second is over
-        vTaskDelay(pdMS_TO_TICKS( 1000 ));
+        vTaskDelay(pdMS_TO_TICKS( 500 ));
     }
 }
 

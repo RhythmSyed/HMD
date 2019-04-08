@@ -29,7 +29,11 @@
     typedef struct {
         lis3dh_float_data_t imu_data;
         uint32_t hr_bpm_data;
+        uint8_t current_mode;
+        uint16_t step_count;
     } display_data_t;
+
+    extern display_data_t display_data;
 
     // Functions    
     //void Epaper_display();
