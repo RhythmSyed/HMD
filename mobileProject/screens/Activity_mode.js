@@ -8,21 +8,16 @@ class Activity_mode extends Component {
         super()
         this.sensorData = {
             HeartRate: "bad",
-            Accelerometer: "bad",
-            Gyroscope: "bad"
+            Accelerometer: "bad"
         }
     }
     
     dataHandler(incoming_data) {
         if (incoming_data.indexOf('H') > -1) {
-            this.sensorData.HeartRate = incoming_data
+            this.sensorData.HeartRate = incoming_data.slice(0,-1)
         } else if (incoming_data.indexOf('A') > -1) {
-            this.sensorData.Accelerometer = incoming_data
-        } else if (incoming_data.indexOf('G') > -1) {
-            this.sensorData.Gyroscope = incoming_data
+            this.sensorData.Accelerometer = incoming_data.slice(0, -1)
         }
-
-
     }
 
     render() {

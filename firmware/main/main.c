@@ -69,12 +69,13 @@ void app_main() {
     //display_data_t * display_data = (display_data_t * )calloc(1, sizeof(display_data_t));
 
     memset(&display_data, 0x00, sizeof(display_data));
+    display_data.current_mode = PAIRING_MODE;
 
 
     // // initializations ***************************************************** make sure you initiazile!!@@@@@@@@@
     BLE_init();
     IMU_init();
-    // heartRate_ADC_init();
+    heartRate_ADC_init();
 
     // // msg received callbacks
     esp_ble_gatts_register_callback(gatts_event_handler);
@@ -91,6 +92,6 @@ void app_main() {
     xTaskCreate(&e_paper_task, "e_paper_task", 4 * 1024, &display_data, 5, NULL);
 
     xTaskCreate(&ActivityMode_task, "ActivityMode_task", 4 * 1024, NULL, 5, NULL);
-    //xTaskCreate(&SleepMode_task, "SleepMode_task", 4 * 1024, &display_data, 5, NULL);
+    xTaskCreate(&SleepMode_task, "SleepMode_task", 4 * 1024, &display_data, 5, NULL);
 
 }

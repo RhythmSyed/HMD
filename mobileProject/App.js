@@ -34,3 +34,4 @@ console.warn = message => {
   }
 };
 
+console.disableYellowBox = true;

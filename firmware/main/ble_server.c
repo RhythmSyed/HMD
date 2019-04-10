@@ -40,7 +40,7 @@
 #define GATTS_NUM_HANDLE     1+(3*GATTS_CHAR_NUM)
 #define BLE_DEVICE_NAME            "HMD_wearable"
 #define BLE_MANUFACTURER_DATA_LEN  4
-#define GATTS_CHAR_VAL_LEN_MAX		40
+#define GATTS_CHAR_VAL_LEN_MAX		22
 
 // static uint8_t led_stat=0;
 uint8_t char1_str[GATTS_CHAR_VAL_LEN_MAX] = {0x11,0x22,0x33};
@@ -178,8 +178,9 @@ static struct gatts_char_inst gl_char[GATTS_CHAR_NUM] = {
 
 void send_BLE(float *data, char sensor) {
 	char str[GATTS_CHAR_VAL_LEN_MAX];
-	sprintf(str, "%f%c", *data, sensor);
-	memcpy(char2_str, &str, sizeof(float) + sizeof(char));
+	sprintf(str, "%0.5f%c", *data, sensor);
+	printf("%s", str);
+	memcpy(char2_str, &str, sizeof(str));
 }
 
 void char1_read_handler(esp_gatts_cb_event_t event, esp_gatt_if_t gatts_if, esp_ble_gatts_cb_param_t *param) {
@@ -319,6 +320,7 @@ void char2_write_handler(esp_gatts_cb_event_t event, esp_gatt_if_t gatts_if, esp
 		}
 	}
 	ESP_LOGI(GATTS_TAG, "char2_write_handler esp_gatt_rsp_t\n");
+	display_data.current_mode = PAIRING_SUCCESS;
     esp_ble_gatts_send_response(gatts_if, param->write.conn_id, param->write.trans_id, ESP_GATT_OK, NULL);
 }
 

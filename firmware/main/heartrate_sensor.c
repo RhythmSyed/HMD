@@ -46,10 +46,10 @@ TimerHandle_t heartRate_timer_init() {
 }
 
 
-uint32_t heartRate_collect_data(int *down_count, int *up_count, uint32_t *expiredCountBuffer, uint8_t *bufferWriteIndex, TimerHandle_t *bpm_timer) {
-    uint32_t bpm = 0;
+int heartRate_collect_data(int *down_count, int *up_count, uint32_t *expiredCountBuffer, uint8_t *bufferWriteIndex, TimerHandle_t *bpm_timer) {
+    int bpm = 0;
     int hrt_bt_adc_val = 0;    
-    uint32_t expiredCount = 0;
+    int expiredCount = 0;
     
     /* fixes watchdog timer issue */
     TIMERG0.wdt_wprotect=TIMG_WDT_WKEY_VALUE;

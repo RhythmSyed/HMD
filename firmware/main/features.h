@@ -23,7 +23,9 @@
 
     enum Mode_select {
         SLEEP_MODE = 0,
-        ACTIVITY_MODE
+        ACTIVITY_MODE,
+        PAIRING_MODE,
+        PAIRING_SUCCESS
     };
 
     typedef struct {
@@ -49,7 +51,7 @@
     // Functions
     void heartRate_ADC_init();
     TimerHandle_t heartRate_timer_init();
-    uint32_t heartRate_collect_data(int *down_count, int *up_count, uint32_t *expiredCountBuffer, uint8_t *bufferWriteIndex, TimerHandle_t *bpm_timer);
+    int heartRate_collect_data(int *down_count, int *up_count, uint32_t *expiredCountBuffer, uint8_t *bufferWriteIndex, TimerHandle_t *bpm_timer);
 /*************************/
 
 

@@ -9,23 +9,39 @@
 
 void ActivityMode_task(void *pvParameters) {
 
-    float upper_threshold = 0.5;
+    float upper_threshold = 0.15;
     int step_count = 1;
     float accel_mag = 0;
 
     display_data.step_count = 0;
 
+    int numReadings = 10;
+    float readings[numReadings];
+    int readIndex = 0;
+    float total = 0;
+    float average = 0;
+
     while(1) {
         if (display_data.current_mode == ACTIVITY_MODE) {
-            // get IMU data
-            //IMU_recordData(display_data);
-            
-            // calculate step
+
+            // moving average algorithm
+            total = total - readings[readIndex];
             accel_mag = sqrt(display_data.imu_data.ax*display_data.imu_data.ax + display_data.imu_data.ay*display_data.imu_data.ay + display_data.imu_data.az*display_data.imu_data.az);
-            printf("accel_mag: %f\n", accel_mag);
-            if (accel_mag > upper_threshold) {
+            readings[readIndex] = accel_mag;
+            total = total + readings[readIndex];
+            readIndex = readIndex + 1;
+
+            if (readIndex >= numReadings) {
+                readIndex = 0;
+            }
+
+            average = total / numReadings;
+            
+            printf("average: %f\n", average);
+            send_BLE(&average, 'A');
+
+            if (average > upper_threshold) {
                 printf("THRESHOLD MET!: %f\n", accel_mag);
-                send_BLE(&accel_mag, 'A');                       // A for accel
                 display_data.step_count += 1;
             }
         }
