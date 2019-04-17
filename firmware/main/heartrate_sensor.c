@@ -107,7 +107,7 @@ int heartRate_collect_data(int *down_count, int *up_count, uint32_t *expiredCoun
 
 
 
-void getBPM_task(void *pvParameter) {
+void BPM_task(void *pvParameter) {
     /* Create timer to count for BPM*/
     TimerHandle_t bmp_timer;
     bmp_timer = xTimerCreate( "Timer", pdMS_TO_TICKS( 10 ), pdTRUE, ( void * ) 0, BPMTimerCallback );
@@ -128,11 +128,11 @@ void getBPM_task(void *pvParameter) {
     int down_count = 0;
     int up_count = 0;
     int hrt_bt_adc_val = 0;
-    uint32_t expiredCount = 0;
+    int expiredCount = 0;
     #define BUFFER_LENGTH 10
-    uint32_t expiredCountBuffer[ BUFFER_LENGTH ];
-    uint8_t bufferWriteIndex = 0;
-    uint32_t bpm = 0;
+    int expiredCountBuffer[ BUFFER_LENGTH ];
+    int bufferWriteIndex = 0;
+    int bpm = 0;
     while (1) {
 
         
@@ -171,7 +171,7 @@ void getBPM_task(void *pvParameter) {
             expiredCount = expiredCount / BUFFER_LENGTH;
             /* Expires every 1/100 of a second. Calc BPM*/
             bpm =  (100 * 60 * 1) / expiredCount;
-            //Epaper_display((int) bpm, 0);
+            display_data.hr_bpm_data = bpm;
 
             //configPRINTF( ( "BEAT! ADC Val: %d  BPM: %d \r\n", hrt_bt_adc_val, bpm ) );
             //printf("BEAT! ADC Val: %d  BPM: %d \r\n", hrt_bt_adc_val, bpm);

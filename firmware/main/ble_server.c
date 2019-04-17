@@ -178,8 +178,11 @@ static struct gatts_char_inst gl_char[GATTS_CHAR_NUM] = {
 
 void send_BLE(float *data, char sensor) {
 	char str[GATTS_CHAR_VAL_LEN_MAX];
-	sprintf(str, "%0.5f%c", *data, sensor);
-	printf("%s", str);
+	if (sensor == 'H') {
+		sprintf(str, "%0.0f%c", *data, sensor);
+	} else if (sensor == 'A') {
+		sprintf(str, "%0.5f%c", *data, sensor);
+	}
 	memcpy(char2_str, &str, sizeof(str));
 }
 
@@ -290,15 +293,12 @@ void char1_write_handler(esp_gatts_cb_event_t event, esp_gatt_if_t gatts_if, esp
 	notify_gatts_if = gatts_if;
 	notify_conn_id = param->write.conn_id;
     esp_ble_gatts_send_response(gatts_if, param->write.conn_id, param->write.trans_id, ESP_GATT_OK, NULL);
-    if (strncmp((const char *)gl_char[0].char_val->attr_value,"LED ON", 6)==0) {
+    if (strncmp((const char *)gl_char[0].char_val->attr_value,"STARTSLEEP", 10)==0) {
     	gpio_set_level(LED_PIN,HIGH);
-    	//led_stat=1;
-    } else if (strncmp((const char *)gl_char[0].char_val->attr_value,"LED OFF", 7)==0) {
+		display_data.current_mode = SLEEP_MODE;
+    } else if (strncmp((const char *)gl_char[0].char_val->attr_value,"STOPSLEEP", 9)==0) {
     	gpio_set_level(LED_PIN,LOW);
-    	//led_stat=0;
-    } else if (strncmp((const char *)gl_char[0].char_val->attr_value,"LED SWITCH",10)==0) {
-    	//led_stat=1-led_stat;
-    	//gpio_set_level(LED_PIN,led_stat);
+		display_data.current_mode = SLEEP_STOP;
     } else if (strncmp((const char *)gl_char[0].char_val->attr_value,"ACTIVITY", 8)==0) {
 		display_data.current_mode = ACTIVITY_MODE;
 	} else if (strncmp((const char *)gl_char[0].char_val->attr_value,"SLEEP", 5)==0) {

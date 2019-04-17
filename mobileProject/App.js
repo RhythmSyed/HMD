@@ -5,6 +5,8 @@ import Splash from './screens/Splash';
 import BLEPairing_mode from './screens/BLEPairing_mode';
 import Sleep_mode from './screens/Sleep_mode';
 import Activity_mode from './screens/Activity_mode';
+import Analytics from './screens/Analytics';
+
 
 export default class App extends Component {
   render() {
@@ -18,7 +20,8 @@ const StackNav = createStackNavigator({
   Splash: Splash,
   BLEPairing_mode: BLEPairing_mode,
   Activity_mode: Activity_mode,
-  Sleep_mode: Sleep_mode
+  Sleep_mode: Sleep_mode,
+  Analytics: Analytics
 });
 
 

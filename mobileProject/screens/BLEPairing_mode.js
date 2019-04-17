@@ -6,7 +6,9 @@ import AwesomeButton from "react-native-really-awesome-button";
 import awsIot from 'aws-iot-device-sdk';
 var AWS = require('aws-sdk');
 AWS.config.update({accessKeyId: 'AKIAIUIKD4PNBBO2TT5A', secretAccessKey: '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', region: 'us-east-2'});
+var iotdata = new AWS.IotData({endpoint:"a358ffdo7gf05m-ats.iot.us-east-2.amazonaws.com"});
 var ddb = new AWS.DynamoDB({apiVersion: '2012-10-08'});
+
 const AWSdevice = awsIot.device({
   host: "a358ffdo7gf05m-ats.iot.us-east-2.amazonaws.com",
   clientId: Math.random(),
@@ -140,7 +142,7 @@ export default class BLEPairing_mode extends Component {
           </View> */}
 
           <View style={styles.activity_button}>
-            <Button title="ACTIVITY MODE" onPress={()=> {              
+            <Button title="ACTIVITY MODE" onPress={()=> { 
               if (this.curr_device == null){
                 Alert.alert(
                   'ERROR',
@@ -159,24 +161,6 @@ export default class BLEPairing_mode extends Component {
                   ddb: ddb
                 })
               }
-
-              var params1 = {
-                TableName:'HMD_DATA',
-                Item:{
-                'TimeStamp': {S: String(this.getTimeStamp())},
-                'HeartRate': {S: String(0)},
-                'Accelerometer': {S: String(1)}
-                }
-              };
-              
-              ddb.putItem(params1, function(err, data) {
-                if (err) {
-                    console.error("Unable to add item. Error JSON:", JSON.stringify(err, null, 2));
-                } else {
-                    console.log("Added item:", JSON.stringify(data, null, 2));
-                }
-              });
-
             }}/>
           </View>
 

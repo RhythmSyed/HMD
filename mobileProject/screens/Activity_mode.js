@@ -7,7 +7,6 @@ class Activity_mode extends Component {
     constructor() {
         super()
         this.sensorData = {
-            HeartRate: "bad",
             Accelerometer: "bad"
         }
     }
@@ -46,14 +45,14 @@ class Activity_mode extends Component {
                             incoming_data = ble_context.dataReceiver(characteristic.value)
                             this.dataHandler(incoming_data)
 
-                            var params = {
-                                TableName:'HMD_DATA',
-                                Item:{
-                                'TimeStamp': {S: String(ble_context.getTimeStamp())},
-                                'HeartRate': {S: String(this.sensorData.HeartRate)},
-                                'Accelerometer': {S: String(this.sensorData.Accelerometer)}
-                                }
-                            };
+                            // var params = {
+                            //     TableName:'HMD_DATA',
+                            //     Item:{
+                            //     'TimeStamp': {S: String(ble_context.getTimeStamp())},
+                            //     'HeartRate': {S: String(this.sensorData.HeartRate)},
+                            //     'Accelerometer': {S: String(this.sensorData.Accelerometer)}
+                            //     }
+                            // };
                               
                             // ddb.putItem(params, function(err, data) {
                             //     if (err) {

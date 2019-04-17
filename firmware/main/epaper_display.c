@@ -236,11 +236,43 @@ void epaper_draw_sleep_mode(epaper_handle_t device, int * position){
     iot_epaper_draw_rectangle(device, 5, 5, 195, 65, COLORED);
 
     sprintf(bpm, "BPM=%2d", display_data.hr_bpm_data);
-    iot_epaper_draw_string(device, 10, 70, bpm, &epaper_font_24, COLORED);
+    iot_epaper_draw_string(device, 10, 90, bpm, &epaper_font_24, COLORED);
 
     // iot_epaper_draw_string(device, 10, 70, "BPM: XXX", &epaper_font_24, COLORED);
-    iot_epaper_draw_string(device, 10, 90, "Sleep Quality:", &epaper_font_20, COLORED);
-    iot_epaper_draw_string(device, 10, 115, "100%%", &epaper_font_24, COLORED);
+    // iot_epaper_draw_string(device, 10, 90, "Sleep Quality:", &epaper_font_20, COLORED);
+    // iot_epaper_draw_string(device, 10, 115, "100%%", &epaper_font_24, COLORED);
+
+    iot_epaper_draw_circle(device, 168, 168, 27, COLORED);
+    iot_epaper_draw_image(device, 147, 161, GIMAGE_HMD, 45, 16);
+    switch((*position)++){
+        case 0:
+            iot_epaper_draw_image(device, 5, 145, GIMAGE_Z, 37, 50);
+            break;
+        case 1:
+            
+            iot_epaper_draw_image(device, 30, 145, GIMAGE_Z, 37, 50);
+            break;
+        case 2:
+            iot_epaper_draw_image(device, 55, 145, GIMAGE_Z, 37, 50);
+            break;
+        case 3:
+            iot_epaper_draw_image(device, 80, 145, GIMAGE_Z, 37, 50);
+            (*position) = 0;
+            break;
+        default:
+            printf("ERROR! \n");
+    }
+}
+
+void epaper_draw_sleep_mode_stop(epaper_handle_t device, int * position){
+    char bpm[sizeof(display_data.hr_bpm_data)];
+
+    iot_epaper_draw_string(device, 10, 10, "Sleep", &epaper_font_24, COLORED);
+    iot_epaper_draw_string(device, 10, 33, "Monitoring", &epaper_font_24, COLORED);
+    iot_epaper_draw_rectangle(device, 5, 5, 195, 65, COLORED);
+
+    // iot_epaper_draw_string(device, 10, 70, "BPM: XXX", &epaper_font_24, COLORED);
+    iot_epaper_draw_string(device, 10, 90, "SLEEP MODE STOPPED:", &epaper_font_16, COLORED);
 
     iot_epaper_draw_circle(device, 168, 168, 27, COLORED);
     iot_epaper_draw_image(device, 147, 161, GIMAGE_HMD, 45, 16);
@@ -330,6 +362,9 @@ void e_paper_task(void *pvParameter)
         }
         else if (display_data.current_mode == SLEEP_MODE) {
             epaper_draw_sleep_mode(device, &position);
+        }
+        else if (display_data.current_mode == SLEEP_STOP) {
+            epaper_draw_sleep_mode_stop(device, &position);
         }
         else if (display_data.current_mode == PAIRING_MODE) {
             epaper_draw_pairing_mode(device);

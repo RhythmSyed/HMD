@@ -76,6 +76,9 @@ void app_main() {
     BLE_init();
     IMU_init();
     heartRate_ADC_init();
+    gpio_pad_select_gpio(GPIO_NUM_13);
+    gpio_set_direction(GPIO_NUM_13, GPIO_MODE_OUTPUT);
+    gpio_set_level(GPIO_NUM_13, 0);
 
     // // msg received callbacks
     esp_ble_gatts_register_callback(gatts_event_handler);
@@ -84,10 +87,11 @@ void app_main() {
 
 
     // Main tasks
-    //xTaskCreate(&getBPM_task, "getBPM_task", 4096, NULL, 5, NULL);
     //xTaskCreate(&blink_task, "blink_task", configMINIMAL_STACK_SIZE, NULL, 5, NULL);
-    //xTaskCreate(&MPU_task, "MPU_task", 4096, NULL, 5, NULL);
+    
     xTaskCreate(&IMU_task, "IMU_task", 4 * 1024, NULL, 5, NULL);
+    xTaskCreate(&BPM_task, "BPM_task", 4096, NULL, 5, NULL);
+    
     /* Task used to test the epaper display*/
     xTaskCreate(&e_paper_task, "e_paper_task", 4 * 1024, &display_data, 5, NULL);
 

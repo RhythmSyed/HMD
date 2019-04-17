@@ -25,12 +25,13 @@
         SLEEP_MODE = 0,
         ACTIVITY_MODE,
         PAIRING_MODE,
-        PAIRING_SUCCESS
+        PAIRING_SUCCESS,
+        SLEEP_STOP
     };
 
     typedef struct {
         lis3dh_float_data_t imu_data;
-        uint32_t hr_bpm_data;
+        int hr_bpm_data;
         uint8_t current_mode;
         uint16_t step_count;
     } display_data_t;
@@ -45,7 +46,7 @@
 
 /*** Heart Rate Sensor ***/
     // Tasks
-    void getBPM_task(void *pvParameter);
+    void BPM_task(void *pvParameter);
     // BPM Callback
     void BPMTimerCallback( TimerHandle_t xTimer );
     // Functions
