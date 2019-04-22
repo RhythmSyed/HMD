@@ -115,10 +115,10 @@ void BPM_task(void *pvParameter) {
         /* The timer was not created. */
     }
     else{
-            /* Start the timer. No block time is specified. Even if one were specified, it would be ignored because the RTOS scheduler has not yet been started. */
-            if( xTimerStart( bmp_timer, 0 ) != pdPASS ){
-                /* The timer could not be set into the Active state. */
-            }
+        /* Start the timer. No block time is specified. Even if one were specified, it would be ignored because the RTOS scheduler has not yet been started. */
+        if( xTimerStart( bmp_timer, 0 ) != pdPASS ){
+            /* The timer could not be set into the Active state. */
+        }
     }
 
     /* Initialize and start the heart rate adc */
@@ -129,7 +129,10 @@ void BPM_task(void *pvParameter) {
     int up_count = 0;
     int hrt_bt_adc_val = 0;
     int expiredCount = 0;
-    #define BUFFER_LENGTH 10
+    #define BUFFER_LENGTH 15
+    #define FILTER_AMOUNT 15
+    int rawLPFilter[ FILTER_AMOUNT ];
+    int lpFilterWriteIndex = 0;
     int expiredCountBuffer[ BUFFER_LENGTH ];
     int bufferWriteIndex = 0;
     int bpm = 0;
@@ -144,14 +147,25 @@ void BPM_task(void *pvParameter) {
         /* The value from the adc for Heart Beat sensor */
         hrt_bt_adc_val = adc1_get_raw(ADC1_CHANNEL_0);
 
+        /* Average Raw values to software LP filter */
+        rawLPFilter[ lpFilterWriteIndex++ ] = hrt_bt_adc_val;
+        if (lpFilterWriteIndex == FILTER_AMOUNT){
+            lpFilterWriteIndex = 0;
+        }
+        /* Average raw in buffer */
+        for(uint8_t index = 0; index < FILTER_AMOUNT; index++){
+            hrt_bt_adc_val += rawLPFilter[ index ];
+        }
+        hrt_bt_adc_val = hrt_bt_adc_val / FILTER_AMOUNT;
+
         /* Thresholds to calculate the if there was a heart beat or not */
         if( hrt_bt_adc_val < 1683){
             down_count++;
         }
-        if(down_count > 10 && hrt_bt_adc_val > 1882){
+        if(down_count > 2 && hrt_bt_adc_val > 1882){
             up_count++;
         }
-        if( up_count > 20 && hrt_bt_adc_val < 1753){
+        if( up_count > 4 && hrt_bt_adc_val < 1753){
             
             down_count = 0;
             up_count = 0;
